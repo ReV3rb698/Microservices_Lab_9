@@ -84,21 +84,21 @@ pipeline {
     post {
         always {
             archiveArtifacts artifacts: 'logs/docker-compose.log'
-            archiveArtifacts artifacts: 'jmeter_results/results.jtl'
+            archiveArtifacts artifacts: '${WORKSPACE_DIR}/jmeter_results/results.jtl'
         }
         success {
             script {
-            sh '''
-            # Add debugging to check the contents of the results folder
-            echo "Listing contents of junit_results folder:"
-            ls -l ${WORKSPACE_DIR}/jmeter_results/junit_results
+                sh '''
+                # Add debugging to check the contents of the results folder
+                echo "Listing contents of junit_results folder:"
+                ls -l ${WORKSPACE_DIR}/jmeter_results/junit_results
 
-            # Debugging JMeter output to ensure the result files are created
-            echo "JUnit results:"
-            cat ${WORKSPACE_DIR}/jmeter_results/junit_results/* || echo "No JUnit results found."
-            '''
+                # Debugging JMeter output to ensure the result files are created
+                echo "JUnit results:"
+                find ${WORKSPACE_DIR}/jmeter_results/junit_results -type f -name "*.xml" -exec cat {} + || echo "No JUnit results found."
+                '''
             }
-            junit '${WORKSPACE_DIR}/jmeter_results/junit_results/test-*.xml'
+            junit '**/jmeter_results/junit_results/*.xml'
             echo 'JMeter tests passed!'
         }
         failure {
@@ -110,12 +110,13 @@ pipeline {
 
                 # Debugging JMeter output to ensure the result files are created
                 echo "JUnit results:"
-                cat ${WORKSPACE_DIR}/jmeter_results/junit_results/*
+                find ${WORKSPACE_DIR}/jmeter_results/junit_results -type f -name "*.xml" -exec cat {} + || echo "No JUnit results found."
                 '''
             }
-            junit '${WORKSPACE_DIR}/jmeter_results/junit_results/test-*.xml'
+            junit '**/jmeter_results/junit_results/*.xml'
             echo 'JMeter tests failed! Check logs for more details.'
         }
     }
 }
+
 
