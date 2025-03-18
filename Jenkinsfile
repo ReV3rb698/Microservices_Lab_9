@@ -41,7 +41,7 @@ pipeline {
                 script {
                     sh '''
                     docker-compose down
-                    docker-compose up -d --build
+                    docker-compose --env-file /var/lib/jenkins/env_files/microservices.env up -d --build
                     '''
                 }
             }
