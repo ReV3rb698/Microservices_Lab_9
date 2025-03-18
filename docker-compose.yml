@@ -1,84 +1,102 @@
+version: '3.8'
+
 services:
   receiver:
     build:
       context: receiver
       dockerfile: Dockerfile
     ports:
-      - "8083:8080"
+      - "8083:8080"  # Exposed externally
     volumes:
       - ./logs:/app/logs
-      - ./config/receiver:/app/config/receiver
-      - ./config/log_config.yml:/app/config/log_config.yml
+      - ./config/prod/receiver:/app/config/receiver
+      - ./config/prod/log_config.yml:/app/config/log_config.yml
     depends_on:
       - kafka
+    networks:
+      - internal_network
 
   storage:
     build:
       context: storage
       dockerfile: Dockerfile
     ports:
-      - "8090:8090"
+      - "8090:8090"  # Exposed externally
     volumes:
       - ./logs:/app/logs
-      - ./config/storage:/app/config/storage
-      - ./config/log_config.yml:/app/config/log_config.yml
+      - ./config/prod/storage:/app/config/storage
+      - ./config/prod/log_config.yml:/app/config/log_config.yml
     depends_on:
       db:
         condition: service_healthy
       kafka:
         condition: service_started
+    networks:
+      - internal_network
 
   analyzer:
     build:
       context: analyzer
       dockerfile: Dockerfile
     ports:
-      - "8100:8100"
+      - "8100:8100"  # Exposed externally
     volumes:
       - ./logs:/app/logs
-      - ./config/analyzer:/app/config/analyzer
-      - ./config/log_config.yml:/app/config/log_config.yml
+      - ./config/prod/analyzer:/app/config/analyzer
+      - ./config/prod/log_config.yml:/app/config/log_config.yml
     depends_on:
       - storage
       - kafka
+    networks:
+      - internal_network
 
   processing:
     build:
       context: processing
       dockerfile: Dockerfile
     ports:
-      - "8091:8091"
+      - "8091:8091"  # Exposed externally
     volumes:
       - ./logs:/app/logs
-      - ./config/processing:/app/config/processing
+      - ./config/prod/processing:/app/config/processing
       - ./data:/app/data
-      - ./config/log_config.yml:/app/config/log_config.yml
+      - ./config/prod/log_config.yml:/app/config/log_config.yml
     depends_on:
       - storage
+    networks:
+      - internal_network
 
   zookeeper:
     image: wurstmeister/zookeeper
+    expose:
+      - "2181"
+      - "2888"
+      - "3888"
     volumes:
       - zookeeper-data:/data
+    networks:
+      - internal_network
 
   kafka:
     image: wurstmeister/kafka
     command: [start-kafka.sh]
-    ports:
-      - "9092:9092"
+    expose:
+      - "9092"  # Internal only
     environment:
       KAFKA_CREATE_TOPICS: "events:1:1"
       KAFKA_ADVERTISED_HOST_NAME: kafka
-      KAFKA_LISTENERS: INSIDE://:29092,OUTSIDE://:9092
+      KAFKA_LISTENERS: INSIDE://:29092
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
-      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:29092,OUTSIDE://kafka:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./data/kafka:/var/lib/kafka/data
     depends_on:
       - zookeeper
+    networks:
+      - internal_network
 
   db:
     image: mysql
@@ -88,17 +106,22 @@ services:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    ports:
-      - "3307:3306"
+    expose:
+      - "3306"  # Internal only
     volumes:
       - ./data/database:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "db"]
-      interval:  30s
+      interval: 30s
       timeout: 10s
       retries: 5
+    networks:
+      - internal_network
 
 volumes:
-  my-db:
   zookeeper-data:
+
+networks:
+  internal_network:
+    driver: bridge
 
