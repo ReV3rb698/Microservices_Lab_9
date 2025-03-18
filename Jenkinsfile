@@ -43,6 +43,10 @@ pipeline {
             steps {
                 script {
                     sh '''
+                    # Remove any existing JMeter results
+                    rm -f jmeter_results/results.jtl
+
+                    # Run JMeter tests
                     jmeter -n -t tests/jmeter_test_plan.jmx -l jmeter_results/results.jtl -e -o jmeter_results/junit_results
                     '''
                 }
