@@ -39,7 +39,7 @@ services:
       context: analyzer
       dockerfile: Dockerfile
     ports:
-      - "8100:8100"  # Exposed externally
+      - "8100:8100"
     volumes:
       - ./logs:/app/logs
       - ./config/prod/analyzer:/app/config/analyzer
@@ -55,7 +55,7 @@ services:
       context: processing
       dockerfile: Dockerfile
     ports:
-      - "8091:8091"  # Exposed externally
+      - "8091:8091"
     volumes:
       - ./logs:/app/logs
       - ./config/prod/processing:/app/config/processing
@@ -74,6 +74,11 @@ services:
       - "3888"
     volumes:
       - zookeeper-data:/data
+    healthcheck:
+      test: ["CMD", "echo", "ruok", "|", "nc", "localhost", "2181"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
       - internal_network
 
@@ -81,7 +86,7 @@ services:
     image: wurstmeister/kafka
     command: [start-kafka.sh]
     expose:
-      - "9092"  # Internal only
+      - "9092"
     environment:
       KAFKA_CREATE_TOPICS: "events:1:1"
       KAFKA_ADVERTISED_HOST_NAME: kafka
@@ -94,7 +99,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./data/kafka:/var/lib/kafka/data
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_healthy
     networks:
       - internal_network
 
@@ -107,9 +113,9 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     expose:
-      - "3306"  # Internal only
+      - "3306"
     volumes:
-      - ./data/database:/var/lib/mysql
+      - db-data:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "db"]
       interval: 30s
@@ -119,6 +125,7 @@ services:
       - internal_network
 
 volumes:
+  db-data:
   zookeeper-data:
 
 networks:
