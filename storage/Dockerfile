@@ -14,6 +14,6 @@ USER nobody
 
 EXPOSE 8090
 
-ENTRYPOINT [ "python3" ]
+ENTRYPOINT [ "sh, "-c" ]
 
-CMD [ "app.py" ]
+CMD [ "python3 db_setup.py && python3 app.py" ]
