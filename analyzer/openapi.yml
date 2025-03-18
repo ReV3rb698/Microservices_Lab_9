@@ -1,0 +1,93 @@
+openapi: 3.0.0
+info:
+  title: F1 Race Event Tracker API
+  version: 1.0.0
+  description: This service will allow you to inspect the Kafka message queue, and run statistics on the events.
+paths:
+  /telemetry_event:
+    get:
+      operationId: app.get_telemetry_index
+      summary: Get telemetry events by Kafka message index.
+      description: Returns the Kafka message at the specified index.
+      parameters:
+        - in: query
+          name: index
+          schema:
+            type: integer
+          required: true
+          description: Kafka message index
+      responses:
+        '200':
+          description: The Kafka message at the specified index.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '404':
+          description: Event not found at the specified index.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Event not found at the specified index.
+  /race_event:
+    get:
+      operationId: app.get_race_event_index
+      summary: Get Kafka message based on index given.
+      description: Returns the Kafka message at the specified index.
+      parameters:
+        - in: query
+          name: index
+          schema:
+            type: integer
+          required: true
+          description: Kafka message index
+      responses:
+        '200':
+          description: The Kafka message at the specified index.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '404':
+          description: Event not found at the specified index.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Event not found at the specified index.
+  /stats:
+    get:
+      operationId: app.get_stats
+      summary: Get event type counts.
+      description: Returns a JSON object with the counts of each event type currently in the queue.
+      responses:
+        '200':
+          description: A JSON object with the counts of each event type.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  telemetry_data:
+                    type: integer
+                  race_events:
+                    type: integer
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Internal server error.

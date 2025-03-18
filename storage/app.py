@@ -1,0 +1,122 @@
+import connexion
+from connexion import NoContent
+from db_class import TelemetryData, RaceEvents
+from datetime import datetime, timezone
+import functools
+from db import make_session
+from sqlalchemy import select
+import yaml
+import logging
+import logging.config
+from dateutil import parser
+from pykafka import KafkaClient
+import json
+from pykafka.common import OffsetType
+from threading import Thread
+import os
+
+os.environ["LOG_FILENAME"] = "/app/logs/storage.log"
+
+# Load logging configuration
+with open('/app/config/log_config.yml', 'r') as f:
+    log_config = yaml.safe_load(f)
+logging.config.dictConfig(log_config)
+logger = logging.getLogger("basicLogger")
+
+with open('/app/config/storage/storage_config.yml', 'r') as f:
+    config = yaml.safe_load(f)
+
+
+def process_messages():
+    hostname = config['events']['hostname'] + ':' + str(config['events']['port'])
+    client = KafkaClient(hosts=hostname)
+    topic = client.topics[str.encode(config['events']['topic'])]
+
+    consumer = topic.get_simple_consumer(consumer_group=b'event_group', reset_offset_on_start=False, auto_offset_reset=OffsetType.LATEST)
+    for msg in consumer:
+        msg_str = msg.value.decode('utf-8')
+        msg = json.loads(msg_str)
+        logger.info("Message: %s", msg)
+
+        payload = msg['payload']
+        if msg["type"] == "telemetry_data":
+            submit_telemetry_data(payload)
+        elif msg["type"] == "race_events":
+            submit_race_events(payload)
+        consumer.commit_offsets()
+
+def setup_kafka_thread():
+    t1 = Thread(target=process_messages)
+    t1.setDaemon(True)
+    t1.start()
+    
+def use_db_session(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        session = make_session()
+        try:
+            result = func(session, *args, **kwargs)
+            return result
+        finally:
+            session.close()
+    return wrapper
+# filepath: /c:/Users/xetro/OneDrive - BCIT/Term 4/Microservices/Week 6/storage/app.py
+@use_db_session
+def submit_race_events(session, body):
+    event = RaceEvents(
+        car_number=body['car_number'],
+        lap_number=body['lap_number'],
+        event_type=body['event_type'],
+        timestamp=int(body['timestamp']),  
+        trace_id=body['trace_id'] 
+    )
+    session.add(event)
+    session.commit()
+    
+    logger.debug("Stored event %s with a trace id of %s", event.event_type, event.trace_id)
+    return NoContent, 201
+
+@use_db_session
+def submit_telemetry_data(session, body):
+    telemetry = TelemetryData(
+        car_number=body['car_number'],
+        lap_number=body['lap_number'],
+        speed=body['speed'],
+        fuel_level=body['fuel_level'],
+        rpm=body['rpm'],
+        timestamp=int(body['timestamp']), 
+        trace_id=body['trace_id']
+    )
+    session.add(telemetry)
+    session.commit()
+   
+    logger.debug("Stored event telemetry_data with a trace id of %s", telemetry.trace_id)
+    return NoContent, 201
+   
+
+@use_db_session
+def get_race_events(session, start_timestamp, end_timestamp):
+    start_dt = int(start_timestamp) 
+    end_dt = int(end_timestamp)  
+    statement = select(RaceEvents).where(RaceEvents.timestamp >= start_dt).where(RaceEvents.timestamp < end_dt)
+    results = [result.to_json() for result in session.execute(statement).scalars()]
+    
+    logger.info("Retrieved %d race events within the time range.", len(results))
+    return results, 200
+
+@use_db_session
+def get_telemetry_data(session, start_timestamp, end_timestamp):
+    start_dt = int(start_timestamp) 
+    end_dt = int(end_timestamp) 
+    statement = select(TelemetryData).where(TelemetryData.timestamp >= start_dt).where(TelemetryData.timestamp < end_dt)
+    results = [result.to_json() for result in session.execute(statement).scalars()]
+    
+    logger.debug("Retrieved %d telemetry events within the time range.", len(results))
+    return results, 200
+
+app = connexion.FlaskApp(__name__, specification_dir='')
+app.add_api('./openapi.yml', strict_validation=True, validate_responses=True)
+
+if __name__ == '__main__':
+    setup_kafka_thread()
+    app.run(port=8090, host="0.0.0.0")

@@ -1,0 +1,82 @@
+openapi: 3.0.1
+info:
+  title: F1 Race Event Tracker API
+  version: 1.0.0
+  description: API to receive F1 race events and telemetry data.
+paths:
+  /race_events:
+    post:
+      operationId: app.submit_race_events
+      summary: Submit race events
+      description: Accepts F1 race event data.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                event_id:
+                  type: string
+                  format: uuid
+                car_number:
+                  type: integer
+                lap_number:
+                  type: integer
+                event_type:
+                  type: string
+                timestamp:
+                  type: string
+                  format: date-time
+              required:
+                - event_id
+                - car_number
+                - lap_number
+                - event_type
+                - timestamp
+      responses:
+        '201':
+          description: Event submitted successfully.
+        '200':
+          description: Event submitted successfully.
+  /telemetry_data:
+    post:
+      operationId: app.submit_telemetry_data
+      summary: Submit telemetry data
+      description: Accepts F1 driver telemetry data.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                telemetry_id:
+                  type: string
+                  format: uuid
+                car_number:
+                  type: integer
+                lap_number:
+                  type: integer
+                speed:
+                  type: number
+                fuel_level:
+                  type: number
+                rpm:
+                  type: integer
+                timestamp:
+                  type: string
+                  format: date-time
+              required:
+                - telemetry_id
+                - car_number
+                - lap_number
+                - speed
+                - fuel_level
+                - rpm
+                - timestamp
+      responses:
+        '201':
+          description: Telemetry data submitted successfully.
+        '200':
+          description: Telemetry data submitted successfully.

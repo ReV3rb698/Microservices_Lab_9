@@ -1,0 +1,10 @@
+{
+  "stat_type_counts": {
+    "telemetry": 50,
+    "race_events": 50
+  },
+  "max_speed": 317,
+  "min_speed": 170,
+  "avg_speed": 227.0,
+  "last_processed_timestamp": 1739907117
+}

@@ -1,0 +1,29 @@
+openapi: 3.0.0
+info:
+  title: F1 Race Event Tracker API
+  version: 1.0.0
+  description: API to receive F1 race events and telemetry data.
+paths:
+  /statistics:
+    get:
+      operationId: app.get_statistics
+      summary: Retrieve event and telemetry statistics.
+      description: Returns computed statistics for events and telemetry data.
+      responses:
+        '200':
+          description: Statistics data.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  event_type_counts:
+                    type: object
+                    additionalProperties:
+                      type: integer
+                  max_speed:
+                    type: number
+                  min_speed:
+                    type: number
+                  avg_speed:
+                    type: number
