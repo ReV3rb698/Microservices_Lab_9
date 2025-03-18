@@ -43,7 +43,7 @@ pipeline {
             steps {
                 script {
                     sh '''
-                    jmeter -n -t tests/jmeter_test_plan.jmx -l results.jtl
+                    jmeter -n -t tests/jmeter_test_plan.jmx -l jmeter_results/results.jtl
                     '''
                 }
             }
@@ -63,7 +63,7 @@ pipeline {
     post {
         always {
             archiveArtifacts artifacts: 'logs/docker-compose.log'
-            archiveArtifacts artifacts: 'results.jtl'
+            archiveArtifacts artifacts: 'jmeter_results/results.jtl'
         }
         failure {
             echo 'Pipeline failed. Check logs for details.'
