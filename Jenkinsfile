@@ -46,6 +46,9 @@ pipeline {
                     # Remove any existing JMeter results
                     rm -f jmeter_results/results.jtl
 
+                    # Create the folder for JUnit results if it doesn't exist
+                    mkdir -p jmeter_results/junit_results
+
                     # Run JMeter tests
                     jmeter -n -t tests/jmeter_test_plan.jmx -l jmeter_results/results.jtl -e -o jmeter_results/junit_results
                     '''
