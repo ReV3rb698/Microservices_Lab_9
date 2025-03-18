@@ -23,8 +23,10 @@ services:
       - ./config/storage:/app/config/storage
       - ./config/log_config.yml:/app/config/log_config.yml
     depends_on:
-      - db
-      - kafka
+      db:
+        condition: service_healthy
+      kafka:
+        condition: service_started
 
   analyzer:
     build:
@@ -90,6 +92,11 @@ services:
       - "3307:3306"
     volumes:
       - ./data/database:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "db"]
+      interval:  30s
+      timeout: 10s
+      retries: 5
 
 volumes:
   my-db:
