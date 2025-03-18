@@ -84,7 +84,7 @@ pipeline {
     post {
         always {
             archiveArtifacts artifacts: 'logs/docker-compose.log'
-            archiveArtifacts artifacts: '${WORKSPACE_DIR}/jmeter_results/results.jtl'
+            archiveArtifacts artifacts: 'jmeter_results/results.jtl'
         }
         success {
             script {
@@ -98,7 +98,7 @@ pipeline {
                 find ${WORKSPACE_DIR}/jmeter_results/junit_results -type f -name "*.xml" -exec cat {} + || echo "No JUnit results found."
                 '''
             }
-            junit '**/jmeter_results/junit_results/*.xml'
+            junit 'jmeter_results/junit_results/*.xml'
             echo 'JMeter tests passed!'
         }
         failure {
@@ -113,10 +113,9 @@ pipeline {
                 find ${WORKSPACE_DIR}/jmeter_results/junit_results -type f -name "*.xml" -exec cat {} + || echo "No JUnit results found."
                 '''
             }
-            junit '**/jmeter_results/junit_results/*.xml'
+            junit 'jmeter_results/junit_results/*.xml'
             echo 'JMeter tests failed! Check logs for more details.'
         }
     }
 }
-
 
