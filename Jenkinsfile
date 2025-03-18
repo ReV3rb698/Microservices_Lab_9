@@ -13,6 +13,13 @@ pipeline {
                 }
             }
         }
+        stage('Check Workspace Path') {
+            steps {
+                script {
+                    sh 'echo "Workspace Path: $WORKSPACE"'
+                }
+            }
+        }
 
         stage('Load Environment Variables') {
             steps {
