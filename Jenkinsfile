@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         ENV_FILE = "/var/lib/jenkins/env_files/microservices.env"
+        WORKSPACE_DIR = "/home/jenkins/workspace/Microservices_Lab_9"
     }
 
     stages {
@@ -51,13 +52,13 @@ pipeline {
                 script {
                     sh '''
                     # Remove any existing JMeter results
-                    rm -f jmeter_results/results.jtl
-		    rm -rf /home/jenkins/workspace/Microservices_Lab_9/jmeter_results
+                    rm -f ${WORKSPACE_DIR}/jmeter_results/results.jtl
+
                     # Create the folder for JUnit results if it doesn't exist
-                    mkdir -p jmeter_results/junit_results
+                    mkdir -p ${WORKSPACE_DIR}/jmeter_results/junit_results
 
                     # Run JMeter tests
-                    jmeter -n -t tests/jmeter_test_plan.jmx -l jmeter_results/results.jtl -e -o jmeter_results/junit_results
+                    jmeter -n -t tests/jmeter_test_plan.jmx -l ${WORKSPACE_DIR}/jmeter_results/results.jtl -e -o ${WORKSPACE_DIR}/jmeter_results/junit_results
                     '''
                 }
             }
@@ -67,7 +68,7 @@ pipeline {
             steps {
                 script {
                     sh '''
-                    docker-compose logs > logs/docker-compose.log
+                    docker-compose logs > ${WORKSPACE_DIR}/logs/docker-compose.log
                     '''
                 }
             }
@@ -76,15 +77,15 @@ pipeline {
 
     post {
         always {
-            archiveArtifacts artifacts: 'logs/docker-compose.log'
-            archiveArtifacts artifacts: 'jmeter_results/results.jtl'
+            archiveArtifacts artifacts: '${WORKSPACE_DIR}/logs/docker-compose.log'
+            archiveArtifacts artifacts: '${WORKSPACE_DIR}/jmeter_results/results.jtl'
         }
         success {
-            junit '**/jmeter_results/junit_results/test-*.xml'  // Make sure this is the correct path to the JUnit results
+            junit '${WORKSPACE_DIR}/jmeter_results/junit_results/test-*.xml'
             echo 'JMeter tests passed!'
         }
         failure {
-            junit '**/jmeter_results/junit_results/test-*.xml'  // Same for failure condition
+            junit '${WORKSPACE_DIR}/jmeter_results/junit_results/test-*.xml'
             echo 'JMeter tests failed! Check logs for more details.'
         }
     }
