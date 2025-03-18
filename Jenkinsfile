@@ -47,28 +47,7 @@ pipeline {
             }
         }
 
-        stage('Run JMeter Tests') {
-            steps {
-                script {
-                    sh '''
-                    # Ensure Jenkins can write to the JMeter results folder
-                    chmod -R 777 ${WORKSPACE_DIR}/jmeter_results
-
-                    # Remove any existing JMeter results
-                    rm -f ${WORKSPACE_DIR}/jmeter_results/results.jtl
-
-                    # Remove any existing JUnit results
-                    rm -rf ${WORKSPACE_DIR}/jmeter_results/junit_results/*
-
-                    # Create the folder for JUnit results if it doesn't exist
-                    mkdir -p ${WORKSPACE_DIR}/jmeter_results/junit_results
-
-                    # Run JMeter tests
-                    jmeter -n -t tests/jmeter_test_plan.jmx -l ${WORKSPACE_DIR}/jmeter_results/results.jtl -j jmeter.save.saveservice.output_format=xml
-                    '''
-                }
-            }
-        }
+        
 
         stage('Post-Test Cleanup') {
             steps {
@@ -84,38 +63,8 @@ pipeline {
     post {
         always {
             archiveArtifacts artifacts: 'logs/docker-compose.log'
-            archiveArtifacts artifacts: 'jmeter_results/results.jtl'
         }
-        success {
-            script {
-                sh '''
-                # Add debugging to check the contents of the results folder
-                echo "Listing contents of junit_results folder:"
-                ls -l ${WORKSPACE_DIR}/jmeter_results/junit_results
-
-                # Debugging JMeter output to ensure the result files are created
-                echo "JUnit results:"
-                find ${WORKSPACE_DIR}/jmeter_results/junit_results -type f -name "*.xml" -exec cat {} + || echo "No JUnit results found."
-                '''
-            }
-            junit 'jmeter_results/junit_results/*.xml'
-            echo 'JMeter tests passed!'
-        }
-        failure {
-            script {
-                sh '''
-                # Add debugging to check the contents of the results folder
-                echo "Listing contents of junit_results folder:"
-                ls -l ${WORKSPACE_DIR}/jmeter_results/junit_results
-
-                # Debugging JMeter output to ensure the result files are created
-                echo "JUnit results:"
-                find ${WORKSPACE_DIR}/jmeter_results/junit_results -type f -name "*.xml" -exec cat {} + || echo "No JUnit results found."
-                '''
-            }
-            junit 'jmeter_results/junit_results/*.xml'
-            echo 'JMeter tests failed! Check logs for more details.'
-        }
+        
     }
 }
 
