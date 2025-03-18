@@ -6,10 +6,9 @@ services:
     ports:
       - "8083:8080"
     volumes:
-      - ./logs:/app/logs 
-      - ./config/receiver:/app/config
-      - ./config/log_config.yml:/app/config/log_config.yml 
-      - ./config/receiver/receiver_config.yml:/app/config/receiver/receiver_config.yml 
+      - ./logs:/app/logs
+      - ./config/receiver:/app/config/receiver
+      - ./config/log_config.yml:/app/config/log_config.yml
     depends_on:
       - kafka
 
@@ -20,10 +19,9 @@ services:
     ports:
       - "8090:8090"
     volumes:
-      - ./logs:/app/logs  
-      - ./config/storage:/app/config  
-      - ./config/log_config.yml:/app/config/log_config.yml 
-      - ./config/storage/storage_config.yml:/app/config/storage/storage_config.yml 
+      - ./logs:/app/logs
+      - ./config/storage:/app/config/storage
+      - ./config/log_config.yml:/app/config/log_config.yml
     depends_on:
       - db
       - kafka
@@ -35,10 +33,9 @@ services:
     ports:
       - "8100:8100"
     volumes:
-      - ./logs:/app/logs  
-      - ./config/analyzer:/app/config  
-      - ./config/log_config.yml:/app/config/log_config.yml  
-      - ./config/analyzer/analyzer_config.yml:/app/config/analyzer/analyzer_config.yml
+      - ./logs:/app/logs
+      - ./config/analyzer:/app/config/analyzer
+      - ./config/log_config.yml:/app/config/log_config.yml
     depends_on:
       - storage
       - kafka
@@ -50,18 +47,17 @@ services:
     ports:
       - "8091:8091"
     volumes:
-      - ./logs:/app/logs  
-      - ./config/processing:/app/config 
+      - ./logs:/app/logs
+      - ./config/processing:/app/config/processing
       - ./data:/app/data
       - ./config/log_config.yml:/app/config/log_config.yml
-      - ./config/processing/processing_config.yml:/app/config/processing/processing_config.yml
     depends_on:
       - storage
 
   zookeeper:
     image: wurstmeister/zookeeper
     volumes:
-      - zookeeper-data:/data  
+      - zookeeper-data:/data
 
   kafka:
     image: wurstmeister/kafka
@@ -69,7 +65,7 @@ services:
     ports:
       - "9092:9092"
     environment:
-      KAFKA_CREATE_TOPICS: "events:1:1" 
+      KAFKA_CREATE_TOPICS: "events:1:1"
       KAFKA_ADVERTISED_HOST_NAME: kafka
       KAFKA_LISTENERS: INSIDE://:29092,OUTSIDE://:9092
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
@@ -78,7 +74,7 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./data/kafka:/var/lib/kafka/data  
+      - ./data/kafka:/var/lib/kafka/data
     depends_on:
       - zookeeper
 
@@ -93,8 +89,9 @@ services:
     ports:
       - "3307:3306"
     volumes:
-      - ./data/database:/var/lib/mysql  
+      - ./data/database:/var/lib/mysql
 
 volumes:
   my-db:
   zookeeper-data:
+
