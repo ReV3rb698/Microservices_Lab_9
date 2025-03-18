@@ -51,6 +51,9 @@ pipeline {
             steps {
                 script {
                     sh '''
+                    # Ensure Jenkins can write to the JMeter results folder
+                    chmod -R 777 ${WORKSPACE_DIR}/jmeter_results
+
                     # Remove any existing JMeter results
                     rm -f ${WORKSPACE_DIR}/jmeter_results/results.jtl
 
@@ -81,10 +84,32 @@ pipeline {
             archiveArtifacts artifacts: '${WORKSPACE_DIR}/jmeter_results/results.jtl'
         }
         success {
+            script {
+                sh '''
+                # Add debugging to check the contents of the results folder
+                echo "Listing contents of junit_results folder:"
+                ls -l ${WORKSPACE_DIR}/jmeter_results/junit_results
+
+                # Debugging JMeter output to ensure the result files are created
+                echo "JUnit results:"
+                cat ${WORKSPACE_DIR}/jmeter_results/junit_results/*
+                '''
+            }
             junit '${WORKSPACE_DIR}/jmeter_results/junit_results/test-*.xml'
             echo 'JMeter tests passed!'
         }
         failure {
+            script {
+                sh '''
+                # Add debugging to check the contents of the results folder
+                echo "Listing contents of junit_results folder:"
+                ls -l ${WORKSPACE_DIR}/jmeter_results/junit_results
+
+                # Debugging JMeter output to ensure the result files are created
+                echo "JUnit results:"
+                cat ${WORKSPACE_DIR}/jmeter_results/junit_results/*
+                '''
+            }
             junit '${WORKSPACE_DIR}/jmeter_results/junit_results/test-*.xml'
             echo 'JMeter tests failed! Check logs for more details.'
         }
