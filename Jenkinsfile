@@ -57,6 +57,9 @@ pipeline {
                     # Remove any existing JMeter results
                     rm -f ${WORKSPACE_DIR}/jmeter_results/results.jtl
 
+                    # Remove any existing JUnit results
+                    rm -rf ${WORKSPACE_DIR}/jmeter_results/junit_results/*
+
                     # Create the folder for JUnit results if it doesn't exist
                     mkdir -p ${WORKSPACE_DIR}/jmeter_results/junit_results
 
