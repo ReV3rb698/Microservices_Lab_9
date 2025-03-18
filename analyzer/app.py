@@ -23,7 +23,8 @@ def get_telemetry_index(index):
     logger.info(f"Fetching telemetry data at index {index}")
     client = KafkaClient(hosts=f"{app_config['events']['hostname']}:{app_config['events']['port']}")
     topic = client.topics[app_config['events']['topic'].encode()]
-    consumer = topic.get_simple_consumer(reset_offset_on_start=True, consumer_timeout_ms=1000)
+    consumer = topic.get_simple_consumer(auto_offset_reset=OffsetType.EARLIEST, consumer_timeout_ms=1000)
+
     counter = 0
     for msg in consumer:
         msg_str = msg.value.decode("utf-8")
