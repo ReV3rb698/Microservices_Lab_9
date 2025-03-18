@@ -84,7 +84,7 @@ pipeline {
     post {
         always {
             archiveArtifacts artifacts: 'logs/docker-compose.log'
-            archiveArtifacts artifacts: '${WORKSPACE_DIR}/jmeter_results/results.jtl'
+            archiveArtifacts artifacts: 'jmeter_results/results.jtl'
         }
         success {
             script {
