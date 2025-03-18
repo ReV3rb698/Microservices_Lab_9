@@ -52,7 +52,7 @@ pipeline {
                     sh '''
                     # Remove any existing JMeter results
                     rm -f jmeter_results/results.jtl
-
+		    rm -rf /home/jenkins/workspace/Microservices_Lab_9/jmeter_results
                     # Create the folder for JUnit results if it doesn't exist
                     mkdir -p jmeter_results/junit_results
 
