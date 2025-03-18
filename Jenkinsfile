@@ -70,11 +70,11 @@ pipeline {
             archiveArtifacts artifacts: 'jmeter_results/results.jtl'
         }
         success {
-            junit '**/jmeter_results/junit_results/test-*.xml' // Use the correct JUnit XML result path
+            junit '**/jmeter_results/junit_results/test-*.xml'  // Make sure this is the correct path to the JUnit results
             echo 'JMeter tests passed!'
         }
         failure {
-            junit '**/jmeter_results/junit_results/test-*.xml' // Same here for failed tests
+            junit '**/jmeter_results/junit_results/test-*.xml'  // Same for failure condition
             echo 'JMeter tests failed! Check logs for more details.'
         }
     }
