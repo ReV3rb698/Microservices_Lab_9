@@ -82,15 +82,13 @@ services:
 
   kafka:
     image: wurstmeister/kafka
-    expose:
-      - "9092"
+    ports:
+      - "9092:9092"  # Expose port 9092 externally
     environment:
       KAFKA_CREATE_TOPICS: "events:1:1"
       KAFKA_ADVERTISED_HOST_NAME: kafka
-      KAFKA_LISTENERS: INSIDE://:29092
-      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
-      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka:29092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
@@ -100,7 +98,6 @@ services:
         condition: service_healthy
     networks:
       - internal_network
-
   db:
     image: mysql
     restart: always
