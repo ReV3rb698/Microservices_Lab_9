@@ -83,20 +83,20 @@ pipeline {
 
     post {
         always {
-            archiveArtifacts artifacts: '${WORKSPACE_DIR}/logs/docker-compose.log'
+            archiveArtifacts artifacts: 'logs/docker-compose.log'
             archiveArtifacts artifacts: '${WORKSPACE_DIR}/jmeter_results/results.jtl'
         }
         success {
             script {
-                sh '''
-                # Add debugging to check the contents of the results folder
-                echo "Listing contents of junit_results folder:"
-                ls -l ${WORKSPACE_DIR}/jmeter_results/junit_results
+            sh '''
+            # Add debugging to check the contents of the results folder
+            echo "Listing contents of junit_results folder:"
+            ls -l ${WORKSPACE_DIR}/jmeter_results/junit_results
 
-                # Debugging JMeter output to ensure the result files are created
-                echo "JUnit results:"
-                cat ${WORKSPACE_DIR}/jmeter_results/junit_results/*
-                '''
+            # Debugging JMeter output to ensure the result files are created
+            echo "JUnit results:"
+            cat ${WORKSPACE_DIR}/jmeter_results/junit_results/* || echo "No JUnit results found."
+            '''
             }
             junit '${WORKSPACE_DIR}/jmeter_results/junit_results/test-*.xml'
             echo 'JMeter tests passed!'
