@@ -43,7 +43,7 @@ pipeline {
             steps {
                 script {
                     sh '''
-                    jmeter -n -t tests/jmeter_test_plan.jmx -l jmeter_results/results.jtl
+                    jmeter -n -t tests/jmeter_test_plan.jmx -l jmeter_results/results.jtl -e -o jmeter_results/junit_results
                     '''
                 }
             }
@@ -66,13 +66,11 @@ pipeline {
             archiveArtifacts artifacts: 'jmeter_results/results.jtl'
         }
         success {
-            // Parse JMeter results and mark build as successful if no failures
-            junit 'jmeter_results/results.jtl'
+            junit '**/jmeter_results/junit_results/test-*.xml' // Use the correct JUnit XML result path
             echo 'JMeter tests passed!'
         }
         failure {
-            // Parse JMeter results and mark build as failed if there are any failures
-            junit 'jmeter_results/results.jtl'
+            junit '**/jmeter_results/junit_results/test-*.xml' // Same here for failed tests
             echo 'JMeter tests failed! Check logs for more details.'
         }
     }
