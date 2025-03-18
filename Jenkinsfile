@@ -64,7 +64,7 @@ pipeline {
                     mkdir -p ${WORKSPACE_DIR}/jmeter_results/junit_results
 
                     # Run JMeter tests
-                    jmeter -n -t tests/jmeter_test_plan.jmx -l ${WORKSPACE_DIR}/jmeter_results/results.jtl -e -o ${WORKSPACE_DIR}/jmeter_results/junit_results
+                    jmeter -n -t tests/jmeter_test_plan.jmx -l ${WORKSPACE_DIR}/jmeter_results/results.jtl -j jmeter.save.saveservice.output_format=xml
                     '''
                 }
             }
