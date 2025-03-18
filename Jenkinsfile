@@ -67,12 +67,12 @@ pipeline {
         }
         success {
             // Parse JMeter results and mark build as successful if no failures
-            junit '**/jmeter_results/results.jtl'
+            junit 'jmeter_results/results.jtl'
             echo 'JMeter tests passed!'
         }
         failure {
             // Parse JMeter results and mark build as failed if there are any failures
-            junit '**/jmeter_results/results.jtl'
+            junit 'jmeter_results/results.jtl'
             echo 'JMeter tests failed! Check logs for more details.'
         }
     }
