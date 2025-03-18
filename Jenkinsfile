@@ -1,10 +1,8 @@
 pipeline {
-    agent { label 'bare-metal-agent' } // Change this to match your Jenkins agent label
+    agent any
 
     environment {
-        REPO_URL = 'git@github.com:ReV3rb698/Microservices_Lab_9.git'
-        BRANCH = 'main'
-        DOCKER_COMPOSE_FILE = 'docker-compose.yml'
+        ENV_FILE = "/var/lib/jenkins/env_files/microservices.env"
     }
 
     stages {
@@ -16,13 +14,26 @@ pipeline {
             }
         }
 
+        stage('Load Environment Variables') {
+            steps {
+                script {
+                    sh '''
+                    if [ -f $ENV_FILE ]; then
+                        export $(grep -v '^#' $ENV_FILE | xargs)
+                    else
+                        echo "⚠️ Warning: .env file not found at $ENV_FILE"
+                    fi
+                    '''
+                }
+            }
+        }
+
         stage('Build and Deploy Services') {
             steps {
                 script {
                     sh '''
                     docker-compose down
-                    docker-compose pull
-                    docker-compose up -d
+                    docker-compose up -d --build
                     '''
                 }
             }
@@ -32,7 +43,7 @@ pipeline {
             steps {
                 script {
                     sh '''
-                    jmeter -n -t tests/jmeter-test.jmx -l results.jtl
+                    jmeter -n -t tests/jmeter_test_plan.jmx -l results.jtl
                     '''
                 }
             }
@@ -41,7 +52,9 @@ pipeline {
         stage('Post-Test Cleanup') {
             steps {
                 script {
-                    sh 'docker-compose logs > logs/docker-compose.log'
+                    sh '''
+                    docker-compose logs > logs/docker-compose.log
+                    '''
                 }
             }
         }
@@ -50,6 +63,7 @@ pipeline {
     post {
         always {
             archiveArtifacts artifacts: 'logs/docker-compose.log'
+            archiveArtifacts artifacts: 'results.jtl'
         }
         failure {
             echo 'Pipeline failed. Check logs for details.'
