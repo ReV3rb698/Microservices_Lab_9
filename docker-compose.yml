@@ -9,8 +9,8 @@ services:
       - "8083:8080"  # Exposed externally
     volumes:
       - ./logs:/app/logs
-      - ./config/prod/receiver:/app/config/receiver
-      - ./config/prod/log_config.yml:/app/config/log_config.yml
+      - ./config/receiver:/app/config/receiver
+      - ./config/log_config.yml:/app/config/log_config.yml
     depends_on:
       - kafka
     networks:
@@ -20,12 +20,12 @@ services:
     build:
       context: storage
       dockerfile: Dockerfile
-    ports:
-      - "8090:8090"  # Exposed externally
+    expose:
+      - "8090"  # Internal only, no external exposure
     volumes:
       - ./logs:/app/logs
-      - ./config/prod/storage:/app/config/storage
-      - ./config/prod/log_config.yml:/app/config/log_config.yml
+      - ./config/storage:/app/config/storage
+      - ./config/log_config.yml:/app/config/log_config.yml
     depends_on:
       db:
         condition: service_healthy
@@ -39,11 +39,11 @@ services:
       context: analyzer
       dockerfile: Dockerfile
     ports:
-      - "8100:8100"
+      - "8100:8100"  # Exposed externally
     volumes:
       - ./logs:/app/logs
-      - ./config/prod/analyzer:/app/config/analyzer
-      - ./config/prod/log_config.yml:/app/config/log_config.yml
+      - ./config/analyzer:/app/config/analyzer
+      - ./config/log_config.yml:/app/config/log_config.yml
     depends_on:
       - storage
       - kafka
@@ -55,12 +55,12 @@ services:
       context: processing
       dockerfile: Dockerfile
     ports:
-      - "8091:8091"
+      - "8091:8091"  # Exposed externally
     volumes:
       - ./logs:/app/logs
-      - ./config/prod/processing:/app/config/processing
+      - ./config/processing:/app/config/processing
       - ./data:/app/data
-      - ./config/prod/log_config.yml:/app/config/log_config.yml
+      - ./config/log_config.yml:/app/config/log_config.yml
     depends_on:
       - storage
     networks:
@@ -84,7 +84,6 @@ services:
 
   kafka:
     image: wurstmeister/kafka
-    command: [start-kafka.sh]
     expose:
       - "9092"
     environment:
