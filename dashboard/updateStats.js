@@ -1,10 +1,10 @@
 /* UPDATE THESE VALUES TO MATCH YOUR SETUP */
 
-const PROCESSING_STATS_API_URL = "http://localhost:8091/statistics";
+const PROCESSING_STATS_API_URL = "http://172.22.0.8:8091/statistics";
 const ANALYZER_API_URL = {
-    stats: "http://localhost:8100/stats",
-    snow: "http://localhost:8100/race_event?index=0",
-    lift: "http://localhost:8100/telemetry_event?index=0"
+    stats: "http://172.22.0.9:8100/stats",
+    snow: "http://172.22.0.9:8100/race_event?index=0",
+    lift: "http://172.22.0.9:8100/telemetry_event?index=0"
 };
 
 
