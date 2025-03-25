@@ -9,6 +9,8 @@ import yaml
 from datetime import datetime, timezone
 import httpx
 import time
+from connexion.middleware import MiddlewarePosition
+from starlette.middleware.cors import CORSMiddleware
 
 os.environ["LOG_FILENAME"] = "/app/logs/processing.log"
 
@@ -122,7 +124,14 @@ def init_scheduler():
 
 app = connexion.FlaskApp(__name__, specification_dir="")
 app.add_api("./openapi.yml", strict_validation=True, validate_responses=True)
-
+app.add_middleware(
+CORSMiddleware,
+position=MiddlewarePosition.BEFORE_EXCEPTION,
+allow_origins=["*"],
+allow_credentials=True,
+allow_methods=["*"],
+allow_headers=["*"],
+)
 if __name__ == "__main__":
     init_scheduler()
     app.run(port=8091, host="0.0.0.0")

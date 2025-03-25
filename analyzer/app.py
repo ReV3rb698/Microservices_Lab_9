@@ -6,7 +6,8 @@ import logging.config
 import yaml
 from pykafka import KafkaClient
 import os
-
+from connexion.middleware import MiddlewarePosition
+from starlette.middleware.cors import CORSMiddleware
 os.environ["LOG_FILENAME"] = "/app/logs/analyzer.log"
 
 # Load logging configuration
@@ -77,5 +78,13 @@ def get_stats():
 app = connexion.FlaskApp(__name__, specification_dir="")
 app.add_api("./openapi.yml", strict_validation=True, validate_responses=True)
 
+app.add_middleware(
+CORSMiddleware,
+position=MiddlewarePosition.BEFORE_EXCEPTION,
+allow_origins=["*"],
+allow_credentials=True,
+allow_methods=["*"],
+allow_headers=["*"],
+)
 if __name__ == "__main__":
     app.run(port=8100, host="0.0.0.0")
