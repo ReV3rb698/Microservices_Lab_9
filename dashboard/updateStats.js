@@ -1,11 +1,12 @@
 /* UPDATE THESE VALUES TO MATCH YOUR SETUP */
 
-const PROCESSING_STATS_API_URL = "http://24.86.85.130:8091/statistics"
+const PROCESSING_STATS_API_URL = "http://processing:8091/statistics";
 const ANALYZER_API_URL = {
-    stats: "http://24.86.85.130:8100/stats",
-    snow: "http://24.86.85.130:8100/race_event?index=0",
-    lift: "http://24.86.85.130:8100/telemetry_event?index=0"
-}
+    stats: "http://analyzer:8100/stats",
+    snow: "http://analyzer:8100/race_event?index=0",
+    lift: "http://analyzer:8100/telemetry_event?index=0"
+};
+
 
 // This function fetches and updates the general statistics
 const makeReq = (url, cb) => {
