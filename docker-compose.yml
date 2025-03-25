@@ -117,6 +117,14 @@ services:
       retries: 5
     networks:
       - internal_network
+  dashboard:
+    build:
+      context: dashboard
+      dockerfile: Dockerfile
+    ports:
+      - "8085:80"  # Use an unused external port, like 8085
+    networks:
+      - internal_network
 
 volumes:
   db-data:
