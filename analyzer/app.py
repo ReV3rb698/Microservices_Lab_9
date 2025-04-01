@@ -76,7 +76,7 @@ def get_stats():
     }, 200
     
 app = connexion.FlaskApp(__name__, specification_dir="")
-app.add_api("./openapi.yml", base_path="analyzer", strict_validation=True, validate_responses=True)
+app.add_api("./openapi.yml", base_path="/analyzer", strict_validation=True, validate_responses=True)
 
 app.add_middleware(
 CORSMiddleware,
