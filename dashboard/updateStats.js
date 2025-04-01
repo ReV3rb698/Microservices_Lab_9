@@ -1,10 +1,10 @@
 /* UPDATE THESE VALUES TO MATCH YOUR SETUP */
 
-const PROCESSING_STATS_API_URL = "https://dashboard.michaelverse.xyz/processing/statistics";
+const PROCESSING_STATS_API_URL = "/processing/statistics";
 const ANALYZER_API_URL = {
-    stats: "https://dashboard.michaelverse.xyz/analyzer/stats",
-    snow: "https://dashboard.michaelverse.xyz/analyzer/race_event?index=0",
-    lift: "https://dashboard.michaelverse.xyz/analyzer/telemetry_event?index=0"
+    stats: "/analyzer/stats",
+    snow: "/analyzer/race_event",
+    lift: "/analyzer/telemetry_event"
 };
 
 
