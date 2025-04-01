@@ -5,6 +5,8 @@ services:
     build:
       context: receiver
       dockerfile: Dockerfile
+    deploy:
+      replicas: 3
     expose:
       - "8080"
     volumes:
