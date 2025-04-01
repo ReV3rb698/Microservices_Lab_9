@@ -123,6 +123,10 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8085:80"  # Use an unused external port, like 8085
+    depends_on:
+    - receiver
+    - analyzer
+    - processing
     networks:
       - internal_network
 
