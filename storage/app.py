@@ -14,6 +14,8 @@ import json
 from pykafka.common import OffsetType
 from threading import Thread
 import os
+from connexion.middleware import MiddlewarePosition
+from starlette.middleware.cors import CORSMiddleware
 
 os.environ["LOG_FILENAME"] = "/app/logs/storage.log"
 
@@ -116,7 +118,15 @@ def get_telemetry_data(session, start_timestamp, end_timestamp):
 
 app = connexion.FlaskApp(__name__, specification_dir='')
 app.add_api('./openapi.yml', base_path="/storage", strict_validation=True, validate_responses=True)
-
+if "CORS_ALLOW_ALL" in os.environ and os.environ["CORS_ALLOW_ALL"] == "yes":    
+    app.add_middleware(
+    CORSMiddleware,
+    position=MiddlewarePosition.BEFORE_EXCEPTION,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    )
 if __name__ == '__main__':
     setup_kafka_thread()
     app.run(port=8090, host="0.0.0.0")
