@@ -24,7 +24,7 @@ with open("/app/config/analyzer/analyzer_config.yml", "r") as f:
     app_config = yaml.safe_load(f)
 
 # Define consistency check file path
-CONSISTENCY_FILE = "./data/consistency_check.json"  # Changed to a relative path
+CONSISTENCY_FILE = "./consistency_check.json"  # Changed to a relative path
 
 def get_telemetry_index(index):
     logger.info(f"Fetching telemetry data at index {index}")
