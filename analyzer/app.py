@@ -230,14 +230,12 @@ def get_consistency_check():
     logger.info("GET request received for consistency check results")
     
     try:
-        # Ensure the directory exists
         os.makedirs(os.path.dirname(CONSISTENCY_FILE), exist_ok=True)
 
         if not os.path.exists(CONSISTENCY_FILE):
             logger.warning("No consistency check file found. Creating a new one.")
-            # Create an empty consistency check file
             consistency_check = {
-                "last_updated": None,
+                "last_updated": int(time.time()),
                 "missing_in_db": [],
                 "missing_in_queue": [],
                 "processing_counts": {}
@@ -249,15 +247,17 @@ def get_consistency_check():
         with open(CONSISTENCY_FILE, "r") as f:
             consistency_check = json.load(f)
         
-        # Ensure last_updated is a valid string or set a default value
-        if isinstance(consistency_check["last_updated"], int):
-            consistency_check["last_updated"] = datetime.fromtimestamp(consistency_check["last_updated"], datetime.timezone.utc).isoformat()
-            
+        # ✅ Ensure it’s an integer (default to 0 if None)
+        if consistency_check.get("last_updated") is None:
+            consistency_check["last_updated"] = 0  # or int(time.time())
+
         logger.info("GET request for consistency check results completed")
         return consistency_check, 200
+
     except Exception as e:
         logger.error(f"Error retrieving consistency check results: {str(e)}")
         return {"message": f"Error: {str(e)}"}, 500
+
     
 app = connexion.FlaskApp(__name__, specification_dir="")
 app.add_api("./openapi.yml", base_path="/analyzer", strict_validation=True, validate_responses=True)
