@@ -163,19 +163,37 @@ def update_consistency_check():
         processing_response.raise_for_status()
         processing_data = processing_response.json()
 
-        # Fetch counts and IDs from analyzer
-        analyzer_response = httpx.get("http://localhost:8100/analyzer/trace_ids")
-        analyzer_response.raise_for_status()
-        analyzer_data = analyzer_response.json()
+        # Fetch race event trace IDs from analyzer
+        race_trace_response = httpx.get("http://localhost:8100/analyzer/race_trace_ids")
+        race_trace_response.raise_for_status()
+        race_trace_ids = race_trace_response.json()
 
-        # Fetch counts and IDs from storage
-        storage_response = httpx.get("http://storage:/storage:8090/storage/trace_ids")
-        storage_response.raise_for_status()
-        storage_data = storage_response.json()
+        # Fetch telemetry trace IDs from analyzer
+        telemetry_trace_response = httpx.get("http://localhost:8100/analyzer/telemetry_trace_ids")
+        telemetry_trace_response.raise_for_status()
+        telemetry_trace_ids = telemetry_trace_response.json()
+
+        # Combine into one set for comparison
+        analyzer_ids = {item["trace_id"] for item in race_trace_ids + telemetry_trace_ids}
+
+
+        # Fetch race trace IDs from storage
+        storage_race_resp = httpx.get("http://storage:8090/storage/event_ids")
+        storage_race_resp.raise_for_status()
+        storage_race_ids = storage_race_resp.json()
+
+        # Fetch telemetry trace IDs from storage
+        storage_telemetry_resp = httpx.get("http://storage:8090/storage/telemetry_ids")
+        storage_telemetry_resp.raise_for_status()
+        storage_telemetry_ids = storage_telemetry_resp.json()
+
+        # Combine into one set of trace IDs
+        storage_ids = {item["trace_id"] for item in storage_race_ids + storage_telemetry_ids}
+
 
         # Compare IDs between analyzer and storage
-        analyzer_ids = {item["trace_id"] for item in analyzer_data}
-        storage_ids = {item["trace_id"] for item in storage_data}
+        analyzer_ids = {item["trace_id"] for item in race_trace_ids + telemetry_trace_ids}
+        storage_ids = {item["trace_id"] for item in storage_race_ids + storage_telemetry_ids}
 
         missing_in_db = list(analyzer_ids - storage_ids)
         missing_in_queue = list(storage_ids - analyzer_ids)
