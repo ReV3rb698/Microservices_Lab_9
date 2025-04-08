@@ -22,6 +22,7 @@ logger = logging.getLogger("basicLogger")
 # Load application configuration
 with open("/app/config/analyzer/analyzer_config.yml", "r") as f:
     app_config = yaml.safe_load(f)
+logger.debug(f"Loaded config: {json.dumps(app_config, indent=2)}")
 
 # Define consistency check file path
 CONSISTENCY_FILE = "./consistency_check.json"  # Changed to a relative path
