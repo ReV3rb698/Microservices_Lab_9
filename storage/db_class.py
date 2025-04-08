@@ -7,7 +7,8 @@ class Base(DeclarativeBase):
 
 class RaceEvents(Base):
     __tablename__ = "race_events"
-    event_id = mapped_column(Integer, primary_key=True)
+    id = mapped_column(Integer, primary_key=True, autoincrement=True)
+    event_id = mapped_column(Integer, nullable=False)
     car_number = mapped_column(Integer, nullable=False)
     lap_number = mapped_column(String(50), nullable=False)
     event_type = mapped_column(String(50), nullable=False)
@@ -28,7 +29,8 @@ class RaceEvents(Base):
         
 class TelemetryData(Base):
     __tablename__ = "telemetry_data"
-    telemetry_id = mapped_column(Integer, primary_key=True)
+    id = mapped_column(Integer, primary_key=True, autoincrement=True)
+    telemetry_id = mapped_column(Integer, nullable=False)
     car_number = mapped_column(Integer, nullable=False)
     lap_number = mapped_column(Integer, nullable=False)
     speed = mapped_column(Integer, nullable=False)
