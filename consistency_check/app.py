@@ -194,9 +194,10 @@ def update_consistency_checks():
                     "telemetry_data": processing_stats.get("stat_type_counts", {}).get("telemetry", 0)
                 }
             },
-            "missing_in_db": missing_in_db,
-            "missing_in_queue": missing_in_queue
+            "not_in_db": missing_in_db,        # <- FIXED
+            "not_in_queue": missing_in_queue   # <- FIXED
         }
+
         
         # Ensure directory exists
         os.makedirs(os.path.dirname(CONSISTENCY_FILE), exist_ok=True)
@@ -218,7 +219,7 @@ def update_consistency_checks():
 def run_scheduled_check():
     """Run scheduled consistency check"""
     logger.info("Running scheduled consistency check")
-    update_consistency_check()
+    update_consistency_checks()
 
 def init_scheduler():
     """Initialize the scheduler for periodic consistency checks"""
