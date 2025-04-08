@@ -25,7 +25,7 @@ paths:
   /checks:
     get:
       summary: Displays the results of the checks
-      operationId: app.get_consistency_check
+      operationId: app.get_consistency_checks
       description: Gets the results of the consistency checks from JSON and returns them
       responses:
         '200':

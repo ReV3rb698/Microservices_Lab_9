@@ -35,7 +35,7 @@ def health_check():
         "timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
     }, 200
 
-def get_consistency_check():
+def get_consistency_checks():
     """Get results of the latest consistency check"""
     logger.info("GET request received for consistency check results")
     
@@ -56,7 +56,7 @@ def get_consistency_check():
         logger.error(f"Error retrieving consistency check results: {str(e)}")
         return {"message": f"Error: {str(e)}"}, 500
 
-def update_consistency_check():
+def update_consistency_checks():
     """Perform consistency check between Kafka queue and storage database"""
     logger.info("Starting consistency check between Kafka queue and storage database")
     start_time = time.time()
