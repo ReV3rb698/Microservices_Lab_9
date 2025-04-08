@@ -45,7 +45,18 @@ def get_consistency_checks():
         
         if not os.path.exists(CONSISTENCY_FILE):
             logger.warning("No consistency check file found")
-            return {"message": "No consistency checks have been run yet"}, 404
+            # Return an empty but valid schema
+            return {
+                "last_updated": int(time.time()),
+                "counts": {
+                    "db": {"race_events": 0, "telemetry_data": 0},
+                    "queue": {"race_events": 0, "telemetry_data": 0},
+                    "processing": {"race_events": 0, "telemetry_data": 0}
+                },
+                "not_in_db": [],
+                "not_in_queue": []
+            }, 200
+
         
         with open(CONSISTENCY_FILE, "r") as f:
             consistency_check = json.load(f)
@@ -194,9 +205,10 @@ def update_consistency_checks():
                     "telemetry_data": processing_stats.get("stat_type_counts", {}).get("telemetry", 0)
                 }
             },
-            "not_in_db": missing_in_db,        # <- FIXED
-            "not_in_queue": missing_in_queue   # <- FIXED
+            "not_in_db": missing_in_db,          # 🔁 FIXED: must match OpenAPI name
+            "not_in_queue": missing_in_queue     # 🔁 FIXED
         }
+
 
         
         # Ensure directory exists
