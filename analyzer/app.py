@@ -150,120 +150,57 @@ def get_race_trace_ids():
 
 def update_consistency_check():
     """Perform consistency check between Kafka queue and storage database"""
-    logger.info("Starting consistency check between Kafka queue and storage database")
+    logger.info("POST request received to update consistency check")
     start_time = time.time()
-    
+
     try:
-        # Get counts from processing
-        processing_response = httpx.get(f"{app_config['endpoints']['processing']}/statistics")
-        if processing_response.status_code != 200:
-            logger.error(f"Failed to get statistics from processing: {processing_response.status_code}")
-            return {"message": "Failed to get statistics from processing"}, 500
-        processing_stats = processing_response.json()
-        
-        # Get counts and IDs from analyzer (Kafka)
-        race_trace_ids_response = get_race_trace_ids()
-        telemetry_trace_ids_response = get_telemetry_trace_ids()
-        
-        race_trace_ids = race_trace_ids_response[0] if race_trace_ids_response[1] == 200 else []
-        telemetry_trace_ids = telemetry_trace_ids_response[0] if telemetry_trace_ids_response[1] == 200 else []
-        
-        # Get counts and IDs from storage (database)
-        storage_race_ids_response = httpx.get(f"{app_config['endpoints']['storage']}/event_ids")
-        storage_telemetry_ids_response = httpx.get(f"{app_config['endpoints']['storage']}/telemetry_ids")
-        
-        if storage_race_ids_response.status_code != 200 or storage_telemetry_ids_response.status_code != 200:
-            logger.error(f"Failed to get IDs from storage: {storage_race_ids_response.status_code}, {storage_telemetry_ids_response.status_code}")
-            return {"message": "Failed to get IDs from storage"}, 500
-        
-        storage_race_ids = storage_race_ids_response.json()
-        storage_telemetry_ids = storage_telemetry_ids_response.json()
-        
-        # Get record counts
-        record_count_response = httpx.get(f"{app_config['endpoints']['storage']}/record_count")
-        if record_count_response.status_code != 200:
-            logger.error(f"Failed to get record count from storage: {record_count_response.status_code}")
-            return {"message": "Failed to get record count from storage"}, 500
-        
-        record_counts = record_count_response.json()
-        
-        # Compare trace IDs to find missing events
-        queue_race_trace_ids = {item["trace_id"]: item["event_id"] for item in race_trace_ids}
-        queue_telemetry_trace_ids = {item["trace_id"]: item["telemetry_id"] for item in telemetry_trace_ids}
-        
-        db_race_trace_ids = {item["trace_id"]: item["event_id"] for item in storage_race_ids}
-        db_telemetry_trace_ids = {item["trace_id"]: item["telemetry_id"] for item in storage_telemetry_ids}
-        
-        # Find events missing in database
-        missing_in_db = []
-        for trace_id, event_id in queue_race_trace_ids.items():
-            if trace_id not in db_race_trace_ids:
-                missing_in_db.append({
-                    "event_id": event_id,
-                    "trace_id": trace_id,
-                    "type": "race_events"
-                })
-        
-        for trace_id, telemetry_id in queue_telemetry_trace_ids.items():
-            if trace_id not in db_telemetry_trace_ids:
-                missing_in_db.append({
-                    "event_id": telemetry_id,
-                    "trace_id": trace_id,
-                    "type": "telemetry_data"
-                })
-        
-        # Find events missing in queue
-        missing_in_queue = []
-        for trace_id, event_id in db_race_trace_ids.items():
-            if trace_id not in queue_race_trace_ids:
-                missing_in_queue.append({
-                    "event_id": event_id,
-                    "trace_id": trace_id,
-                    "type": "race_events"
-                })
-        
-        for trace_id, telemetry_id in db_telemetry_trace_ids.items():
-            if trace_id not in queue_telemetry_trace_ids:
-                missing_in_queue.append({
-                    "event_id": telemetry_id,
-                    "trace_id": trace_id,
-                    "type": "telemetry_data"
-                })
-        
-        # Prepare consistency check result
+        # Fetch counts and IDs from processing
+        processing_response = httpx.get(f"http://{app_config['processing']['hostname']}:{app_config['processing']['port']}/stats")
+        processing_response.raise_for_status()
+        processing_data = processing_response.json()
+
+        # Fetch counts and IDs from analyzer
+        analyzer_response = httpx.get(f"http://{app_config['analyzer']['hostname']}:{app_config['analyzer']['port']}/trace_ids")
+        analyzer_response.raise_for_status()
+        analyzer_data = analyzer_response.json()
+
+        # Fetch counts and IDs from storage
+        storage_response = httpx.get(f"http://{app_config['storage']['hostname']}:{app_config['storage']['port']}/trace_ids")
+        storage_response.raise_for_status()
+        storage_data = storage_response.json()
+
+        # Compare IDs between analyzer and storage
+        analyzer_ids = {item["trace_id"] for item in analyzer_data}
+        storage_ids = {item["trace_id"] for item in storage_data}
+
+        missing_in_db = list(analyzer_ids - storage_ids)
+        missing_in_queue = list(storage_ids - analyzer_ids)
+
+        # Prepare consistency check results
         consistency_check = {
-            "last_updated": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"),
-            "counts": {
-                "db": {
-                    "race_events": record_counts.get("race_events", 0),
-                    "telemetry_data": record_counts.get("telemetry_data", 0)
-                },
-                "queue": {
-                    "race_events": len(race_trace_ids),
-                    "telemetry_data": len(telemetry_trace_ids)
-                },
-                "processing": {
-                    "race_events": processing_stats.get("stat_type_counts", {}).get("race_events", 0),
-                    "telemetry_data": processing_stats.get("stat_type_counts", {}).get("telemetry", 0)
-                }
-            },
+            "last_updated": int(time.time()),
             "missing_in_db": missing_in_db,
-            "missing_in_queue": missing_in_queue
+            "missing_in_queue": missing_in_queue,
+            "processing_counts": processing_data
         }
-        
-        # Save consistency check result to file
-        os.makedirs(os.path.dirname(CONSISTENCY_FILE), exist_ok=True)
+
+        # Save results to file
         with open(CONSISTENCY_FILE, "w") as f:
-            json.dump(consistency_check, f, indent=2)
-        
-        end_time = time.time()
-        processing_time_ms = int((end_time - start_time) * 1000)
-        
-        logger.info(f"Consistency checks completed | processing_time_ms={processing_time_ms} | missing_in_db={len(missing_in_db)} | missing_in_queue={len(missing_in_queue)}")
-        
+            json.dump(consistency_check, f, indent=4)
+
+        # Calculate processing time
+        processing_time_ms = int((time.time() - start_time) * 1000)
+
+        # Log summary
+        logger.info(
+            f"Consistency checks completed | processing_time_ms={processing_time_ms} | "
+            f"missing_in_db={len(missing_in_db)} | missing_in_queue={len(missing_in_queue)}"
+        )
+
         return {"processing_time_ms": processing_time_ms}, 200
+
     except Exception as e:
-        logger.error(f"Error performing consistency check: {str(e)}")
+        logger.error(f"Error during consistency check update: {str(e)}")
         return {"message": f"Error: {str(e)}"}, 500
 
 def get_consistency_check():
