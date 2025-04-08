@@ -90,9 +90,6 @@ def get_stats():
     }, 200
 
 def get_telemetry_trace_ids():
-    """Get list of telemetry IDs and trace IDs from Kafka"""
-    logger.info("GET request received for telemetry trace IDs from Kafka")
-    
     try:
         client = KafkaClient(hosts=f"{app_config['events']['hostname']}:{app_config['events']['port']}")
         topic = client.topics[app_config['events']['topic'].encode()]
@@ -112,7 +109,6 @@ def get_telemetry_trace_ids():
                         })
         
         logger.debug(f"Retrieved {len(results)} telemetry trace IDs from Kafka")
-        logger.info("GET request for telemetry trace IDs completed")
         
         return results, 200
     except Exception as e:
@@ -120,7 +116,6 @@ def get_telemetry_trace_ids():
         return {"message": f"Error: {str(e)}"}, 500
 
 def get_race_trace_ids():
-    """Get list of race event IDs and trace IDs from Kafka"""
     logger.info("GET request received for race event trace IDs from Kafka")
     
     try:
@@ -150,8 +145,6 @@ def get_race_trace_ids():
         return {"message": f"Error: {str(e)}"}, 500
 
 
-
-    
 app = connexion.FlaskApp(__name__, specification_dir="")
 app.add_api("./openapi.yml", base_path="/analyzer", strict_validation=True, validate_responses=True)
 
