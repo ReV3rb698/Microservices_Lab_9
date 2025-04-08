@@ -1,72 +1,20 @@
 openapi: 3.0.0
 info:
-  title: F1 Race Consistency Check API
-  version: 1.0.0
-  description: Service to check consistency between Kafka queue and database storage
+  description: This API provides consistency checks between the database and the Kafka queue
+  version: "1.0.0"
+  title: Consistency API
+  contact:
+    email: student@bcit.ca
+
 paths:
-  /consistency:
-    get:
-      operationId: app.get_consistency_check
-      summary: Get results of the latest consistency check
-      description: Returns the results of the latest consistency check
-      responses:
-        '200':
-          description: Latest consistency check results
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  last_updated:
-                    type: string
-                    format: date-time
-                  counts:
-                    type: object
-                    properties:
-                      db:
-                        type: object
-                        additionalProperties:
-                          type: integer
-                      queue:
-                        type: object
-                        additionalProperties:
-                          type: integer
-                      processing:
-                        type: object
-                        additionalProperties:
-                          type: integer
-                  missing_in_db:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        event_id:
-                          type: string
-                        trace_id:
-                          type: string
-                        type:
-                          type: string
-                  missing_in_queue:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        event_id:
-                          type: string
-                        trace_id:
-                          type: string
-                        type:
-                          type: string
-        '404':
-          description: No consistency checks have been run yet
-  /check:
+  /update:
     post:
-      operationId: app.update_consistency_check
-      summary: Perform consistency check between Kafka queue and storage database
-      description: Retrieves data from processing, analyzer, and storage to compare event records and identify discrepancies
+      summary: Endpoint to run the checks
+      operationId: app.run_consistency_checks
+      description: Runs the consistency checks and updates the JSON datastore
       responses:
         '200':
-          description: Consistency check completed successfully
+          description: Successfully ran the checks
           content:
             application/json:
               schema:
@@ -74,25 +22,80 @@ paths:
                 properties:
                   processing_time_ms:
                     type: integer
-                    description: Time taken to run the checks in milliseconds
-        '500':
-          description: Error performing consistency check
-  /health:
+  /checks:
     get:
-      operationId: app.health_check
-      summary: Health check endpoint
-      description: Returns the health status of the service
+      summary: Displays the results of the checks
+      operationId: app.get_checks
+      description: Gets the results of the consistency checks from JSON and returns them
       responses:
         '200':
-          description: Service is healthy
+          description: Successfully returned the results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Checks'
+        '404':
+          description: No checks have been run
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  status:
+                  message:
                     type: string
-                    enum: [healthy]
-                  timestamp:
-                    type: string
-                    format: date-time
+components:
+  schemas:
+    Checks:
+      required:
+      - counts
+      - not_in_db
+      - not_in_queue
+      - last_updated
+      type: object
+      properties:
+        last_updated:
+          type: string
+          format: date-time
+        counts:
+          type: object
+          properties:
+            db:
+              type: object
+              properties:
+                event1:
+                  type: integer
+                event2:
+                  type: integer
+            queue:
+              type: object
+              properties:
+                event1:
+                  type: integer
+                event2:
+                  type: integer
+            processing:
+              type: object
+              properties:
+                event1:
+                  type: integer
+                event2:
+                  type: integer
+        not_in_db:
+          type: array
+          items:
+            type: object
+            properties:
+              event_id:
+                type: string
+              trace_id:
+                type: string
+        not_in_queue:
+          type: array
+          items:
+            type: object
+            properties:
+              event_id:
+                type: string
+              trace_id:
+                type: string
+

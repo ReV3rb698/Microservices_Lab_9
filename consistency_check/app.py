@@ -80,6 +80,11 @@ def update_consistency_check():
         
         logger.debug(f"Fetching analyzer statistics from: {analyzer_stats_url}")
         analyzer_stats_response = httpx.get(analyzer_stats_url)
+        if analyzer_stats_response.status_code == 200:
+            analyzer_stats = analyzer_stats_response.json()
+        else:
+            logger.error(f"Failed to fetch analyzer statistics: {analyzer_stats_response.status_code}")
+            return {"message": "Failed to fetch analyzer statistics"}, 500
         
         logger.debug(f"Fetching race trace IDs from: {analyzer_race_ids_url}")
         analyzer_race_ids_response = httpx.get(analyzer_race_ids_url)
