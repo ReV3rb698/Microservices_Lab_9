@@ -5,8 +5,8 @@ const ANALYZER_API_URL = {
     stats: "/analyzer/stats",
     snow: "/analyzer/race_event",
     lift: "/analyzer/telemetry_event",
-    checks: "/consistency_check/checks",
-    update: "/consistency_check/update"
+    checks: "/consistency/checks",
+    update: "/consistency/update"
 };
 
 // This function fetches and updates the general statistics
