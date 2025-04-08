@@ -163,6 +163,14 @@ services:
       - receiver
       - analyzer
       - processing
+      - storage
+      - consistency_check
+    environment:
+      - RECEIVER_URL=http://receiver:8080
+      - STORAGE_URL=http://storage:8090
+      - ANALYZER_URL=http://analyzer:8100
+      - PROCESSING_URL=http://processing:8091
+      - CONSISTENCY_CHECK_URL=http://consistency_check:8110
     networks:
       - internal_network
 
