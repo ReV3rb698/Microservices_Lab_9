@@ -87,13 +87,21 @@ def update_consistency_check():
         logger.debug(f"Fetching telemetry trace IDs from: {analyzer_telemetry_ids_url}")
         analyzer_telemetry_ids_response = httpx.get(analyzer_telemetry_ids_url)
         
+        # Debug logging for Kafka responses
+        logger.debug(f"Race trace ID response: {analyzer_race_ids_response.json() if analyzer_race_ids_response.status_code == 200 else analyzer_race_ids_response.text}")
+        logger.debug(f"Telemetry trace ID response: {analyzer_telemetry_ids_response.json() if analyzer_telemetry_ids_response.status_code == 200 else analyzer_telemetry_ids_response.text}")
+        
         if (analyzer_stats_response.status_code != 200 or 
             analyzer_race_ids_response.status_code != 200 or 
             analyzer_telemetry_ids_response.status_code != 200):
             logger.error(f"Failed to get data from analyzer: {analyzer_stats_response.status_code}, {analyzer_race_ids_response.status_code}, {analyzer_telemetry_ids_response.status_code}")
             return {"message": "Failed to get data from analyzer"}, 500
-        
-        analyzer_stats = analyzer_stats_response.json()
+
+        # Handle Kafka trace ID responses safely
+        if analyzer_race_ids_response.status_code != 200 or analyzer_telemetry_ids_response.status_code != 200:
+            logger.error("Failed to fetch trace IDs from analyzer (Kafka)")
+            return {"message": "Failed to fetch trace IDs from Kafka"}, 500
+
         race_trace_ids = analyzer_race_ids_response.json()
         telemetry_trace_ids = analyzer_telemetry_ids_response.json()
         
