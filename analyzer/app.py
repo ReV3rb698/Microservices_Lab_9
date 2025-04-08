@@ -24,7 +24,7 @@ with open("/app/config/analyzer/analyzer_config.yml", "r") as f:
     app_config = yaml.safe_load(f)
 
 # Define consistency check file path
-CONSISTENCY_FILE = "/app/data/consistency_check.json"
+CONSISTENCY_FILE = "./data/consistency_check.json"  # Changed to a relative path
 
 def get_telemetry_index(index):
     logger.info(f"Fetching telemetry data at index {index}")
@@ -154,6 +154,9 @@ def update_consistency_check():
     start_time = time.time()
 
     try:
+        # Ensure the directory exists
+        os.makedirs(os.path.dirname(CONSISTENCY_FILE), exist_ok=True)
+
         # Fetch counts and IDs from processing
         processing_response = httpx.get(f"http://{app_config['processing']['hostname']}:{app_config['processing']['port']}/stats")
         processing_response.raise_for_status()
@@ -208,6 +211,9 @@ def get_consistency_check():
     logger.info("GET request received for consistency check results")
     
     try:
+        # Ensure the directory exists
+        os.makedirs(os.path.dirname(CONSISTENCY_FILE), exist_ok=True)
+
         if not os.path.exists(CONSISTENCY_FILE):
             logger.warning("No consistency check file found. Creating a new one.")
             # Create an empty consistency check file
