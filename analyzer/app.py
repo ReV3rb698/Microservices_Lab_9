@@ -164,7 +164,7 @@ def update_consistency_check():
         processing_data = processing_response.json()
 
         # Fetch counts and IDs from analyzer
-        analyzer_response = httpx.get(f"http://{app_config['analyzer']['hostname']}:{app_config['analyzer']['port']}/analyzer/trace_ids")
+        analyzer_response = httpx.get("http://localhost:8100/analyzer/trace_ids")
         analyzer_response.raise_for_status()
         analyzer_data = analyzer_response.json()
 
