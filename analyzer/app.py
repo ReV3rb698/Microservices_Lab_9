@@ -250,9 +250,9 @@ def get_consistency_check():
             consistency_check = json.load(f)
         
         # Ensure last_updated is a valid string or set a default value
-        if consistency_check["last_updated"] is None:
-            consistency_check["last_updated"] = "1970-01-01T00:00:00Z"
-        
+        if isinstance(consistency_check["last_updated"], int):
+            consistency_check["last_updated"] = datetime.fromtimestamp(consistency_check["last_updated"], datetime.timezone.utc).isoformat()
+            
         logger.info("GET request for consistency check results completed")
         return consistency_check, 200
     except Exception as e:
