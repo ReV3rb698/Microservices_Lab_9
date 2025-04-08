@@ -28,15 +28,8 @@ with open('/app/config/consistency_check/consistency_config.yml', 'r') as f:
 # Define consistency check file path
 CONSISTENCY_FILE = app_config['datastore']['filename']
 
-def health_check():
-    """Health check endpoint"""
-    return {
-        "status": "healthy",
-        "timestamp": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
-    }, 200
 
 def get_consistency_checks():
-    """Get results of the latest consistency check"""
     logger.info("GET request received for consistency check results")
     
     try:
@@ -68,7 +61,6 @@ def get_consistency_checks():
         return {"message": f"Error: {str(e)}"}, 500
 
 def update_consistency_checks():
-    """Perform consistency check between Kafka queue and storage database"""
     logger.info("Starting consistency check between Kafka queue and storage database")
     start_time = time.time()
     
@@ -103,10 +95,6 @@ def update_consistency_checks():
         logger.debug(f"Fetching telemetry trace IDs from: {analyzer_telemetry_ids_url}")
         analyzer_telemetry_ids_response = httpx.get(analyzer_telemetry_ids_url)
         
-        # Debug logging for Kafka responses
-        logger.debug(f"Race trace ID response: {analyzer_race_ids_response.json() if analyzer_race_ids_response.status_code == 200 else analyzer_race_ids_response.text}")
-        logger.debug(f"Telemetry trace ID response: {analyzer_telemetry_ids_response.json() if analyzer_telemetry_ids_response.status_code == 200 else analyzer_telemetry_ids_response.text}")
-        
         if (analyzer_stats_response.status_code != 200 or 
             analyzer_race_ids_response.status_code != 200 or 
             analyzer_telemetry_ids_response.status_code != 200):
@@ -138,7 +126,6 @@ def update_consistency_checks():
         if (storage_record_count_response.status_code != 200 or 
             storage_race_ids_response.status_code != 200 or 
             storage_telemetry_ids_response.status_code != 200):
-            logger.error(f"Failed to get data from storage: {storage_record_count_response.status_code}, {storage_race_ids_response.status_code}, {storage_telemetry_ids_response.status_code}")
             return {"message": "Failed to get data from storage"}, 500
         
         record_counts = storage_record_count_response.json()
@@ -205,8 +192,8 @@ def update_consistency_checks():
                     "telemetry_data": processing_stats.get("stat_type_counts", {}).get("telemetry", 0)
                 }
             },
-            "not_in_db": missing_in_db,          # 🔁 FIXED: must match OpenAPI name
-            "not_in_queue": missing_in_queue     # 🔁 FIXED
+            "not_in_db": missing_in_db,
+            "not_in_queue": missing_in_queue
         }
 
 
