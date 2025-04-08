@@ -1,9 +1,0 @@
----
-events:
-  hostname: "kafka"
-  port: 9092
-  topic: "events"
-
-endpoints:
-  storage: "http://storage:8090/storage"
-  processing: "http://processing:8091/processing"
