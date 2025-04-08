@@ -209,8 +209,17 @@ def get_consistency_check():
     
     try:
         if not os.path.exists(CONSISTENCY_FILE):
-            logger.warning("No consistency check file found")
-            return {"message": "No consistency checks have been run yet"}, 404
+            logger.warning("No consistency check file found. Creating a new one.")
+            # Create an empty consistency check file
+            consistency_check = {
+                "last_updated": None,
+                "missing_in_db": [],
+                "missing_in_queue": [],
+                "processing_counts": {}
+            }
+            with open(CONSISTENCY_FILE, "w") as f:
+                json.dump(consistency_check, f, indent=4)
+            return consistency_check, 200
         
         with open(CONSISTENCY_FILE, "r") as f:
             consistency_check = json.load(f)
