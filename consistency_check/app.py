@@ -114,13 +114,10 @@ def update_consistency_checks():
         storage_race_ids_url = f"{app_config['endpoints']['storage']}/event_ids"
         storage_telemetry_ids_url = f"{app_config['endpoints']['storage']}/telemetry_ids"
         
-        logger.debug(f"Fetching storage record count from: {storage_record_count_url}")
         storage_record_count_response = httpx.get(storage_record_count_url)
-        
-        logger.debug(f"Fetching storage race IDs from: {storage_race_ids_url}")
+
         storage_race_ids_response = httpx.get(storage_race_ids_url)
         
-        logger.debug(f"Fetching storage telemetry IDs from: {storage_telemetry_ids_url}")
         storage_telemetry_ids_response = httpx.get(storage_telemetry_ids_url)
         
         if (storage_record_count_response.status_code != 200 or 
