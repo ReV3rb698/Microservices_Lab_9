@@ -54,8 +54,7 @@ components:
       type: object
       properties:
         last_updated:
-          type: string
-          format: date-time
+          type: integer
         counts:
           type: object
           properties:

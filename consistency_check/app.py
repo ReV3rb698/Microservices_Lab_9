@@ -179,7 +179,7 @@ def update_consistency_check():
         
         # Prepare consistency check result
         consistency_check = {
-            "last_updated": datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "last_updated": int(time.time()),
             "counts": {
                 "db": {
                     "race_events": record_counts.get("race_events", 0),
