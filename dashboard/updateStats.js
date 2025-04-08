@@ -68,8 +68,8 @@ const getStats = () => {
         
         // Update summary stats
         if (result.counts) {
-            document.getElementById("missing-db-count").innerText = result.missing_in_db ? result.missing_in_db.length : 0;
-            document.getElementById("missing-queue-count").innerText = result.missing_in_queue ? result.missing_in_queue.length : 0;
+            document.getElementById("missing-db-count").innerText = result.missing_in_db ? result.not_in_db.length : 0;
+            document.getElementById("missing-queue-count").innerText = result.missing_in_queue ? result.not_in_queue.length : 0;
         }
     });
 };
