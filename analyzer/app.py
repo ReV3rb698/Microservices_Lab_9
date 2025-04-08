@@ -159,7 +159,7 @@ def update_consistency_check():
         os.makedirs(os.path.dirname(CONSISTENCY_FILE), exist_ok=True)
 
         # Fetch counts and IDs from processing
-        processing_response = httpx.get(f"http://{app_config['processing']['hostname']}:{app_config['processing']['port']}/processing/statistics")
+        processing_response = httpx.get("http://processing:8091/processing/statistics")
         processing_response.raise_for_status()
         processing_data = processing_response.json()
 
@@ -169,7 +169,7 @@ def update_consistency_check():
         analyzer_data = analyzer_response.json()
 
         # Fetch counts and IDs from storage
-        storage_response = httpx.get(f"http://{app_config['storage']['hostname']}:{app_config['storage']['port']}/storage/trace_ids")
+        storage_response = httpx.get("http://storage:/storage:8090/storage/trace_ids")
         storage_response.raise_for_status()
         storage_data = storage_response.json()
 
