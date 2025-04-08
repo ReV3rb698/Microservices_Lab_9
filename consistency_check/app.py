@@ -39,16 +39,7 @@ def get_consistency_checks():
         if not os.path.exists(CONSISTENCY_FILE):
             logger.warning("No consistency check file found")
             # Return an empty but valid schema
-            return {
-                "last_updated": int(time.time()),
-                "counts": {
-                    "db": {"race_events": 0, "telemetry_data": 0},
-                    "queue": {"race_events": 0, "telemetry_data": 0},
-                    "processing": {"race_events": 0, "telemetry_data": 0}
-                },
-                "not_in_db": [],
-                "not_in_queue": []
-            }, 200
+            return 404
 
         
         with open(CONSISTENCY_FILE, "r") as f:
