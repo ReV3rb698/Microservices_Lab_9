@@ -56,7 +56,14 @@ const getStats = () => {
         
         // Update the last check time
         if (result.last_updated) {
-            document.getElementById("last-check-time").innerText = new Date(result.last_updated).toLocaleString();
+            const dateVal = result.last_updated;
+            const date = typeof dateVal === "number"
+                ? new Date(dateVal)
+                : new Date(Date.parse(dateVal));
+
+            document.getElementById("last-check-time").innerText = isNaN(date)
+                ? "Unknown"
+                : date.toLocaleString();
         }
         
         // Update summary stats
