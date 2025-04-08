@@ -10,7 +10,7 @@ paths:
   /update:
     post:
       summary: Endpoint to run the checks
-      operationId: app.run_consistency_checks
+      operationId: app.update_consistency_checks
       description: Runs the consistency checks and updates the JSON datastore
       responses:
         '200':
@@ -25,7 +25,7 @@ paths:
   /checks:
     get:
       summary: Displays the results of the checks
-      operationId: app.get_checks
+      operationId: app.get_consistency_check
       description: Gets the results of the consistency checks from JSON and returns them
       responses:
         '200':
