@@ -58,7 +58,7 @@ const getStats = () => {
         if (result.last_updated) {
             const dateVal = result.last_updated;
             const date = typeof dateVal === "number"
-                ? new Date(dateVal)
+                ? new Date(dateVal * 1000)
                 : new Date(Date.parse(dateVal));
 
             document.getElementById("last-check-time").innerText = isNaN(date)
