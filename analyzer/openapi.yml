@@ -91,3 +91,114 @@ paths:
                   error:
                     type: string
                     example: Internal server error.
+  /telemetry_trace_ids:
+    get:
+      operationId: app.get_telemetry_trace_ids
+      summary: Get list of telemetry IDs and trace IDs from Kafka
+      description: Returns a list containing the telemetry ID and trace ID for each telemetry event in Kafka.
+      responses:
+        '200':
+          description: List of telemetry IDs and trace IDs from Kafka.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    telemetry_id:
+                      type: string
+                    trace_id:
+                      type: string
+  /race_trace_ids:
+    get:
+      operationId: app.get_race_trace_ids
+      summary: Get list of race event IDs and trace IDs from Kafka
+      description: Returns a list containing the event ID and trace ID for each race event in Kafka.
+      responses:
+        '200':
+          description: List of race event IDs and trace IDs from Kafka.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    event_id:
+                      type: string
+                    trace_id:
+                      type: string
+  /update:
+    post:
+      operationId: app.update_consistency_check
+      summary: Perform consistency check between Kafka queue and storage database
+      description: Retrieves data from processing, analyzer, and storage to compare event records and identify discrepancies.
+      responses:
+        '200':
+          description: Consistency check completed successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  processing_time_ms:
+                    type: integer
+                    description: Time taken to run the checks in milliseconds
+        '500':
+          description: Error performing consistency check.
+  /checks:
+    get:
+      operationId: app.get_consistency_check
+      summary: Get results of the latest consistency check
+      description: Returns the results of the latest consistency check run by the /update endpoint.
+      responses:
+        '200':
+          description: Latest consistency check results.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  last_updated:
+                    type: string
+                    format: date-time
+                  counts:
+                    type: object
+                    properties:
+                      db:
+                        type: object
+                        additionalProperties:
+                          type: integer
+                      queue:
+                        type: object
+                        additionalProperties:
+                          type: integer
+                      processing:
+                        type: object
+                        additionalProperties:
+                          type: integer
+                  missing_in_db:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        event_id:
+                          type: string
+                        trace_id:
+                          type: string
+                        type:
+                          type: string
+                  missing_in_queue:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        event_id:
+                          type: string
+                        trace_id:
+                          type: string
+                        type:
+                          type: string
+        '404':
+          description: No consistency checks have been run yet.

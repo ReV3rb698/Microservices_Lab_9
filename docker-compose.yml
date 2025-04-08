@@ -50,6 +50,7 @@ services:
       - ./logs:/app/logs
       - ./config/analyzer:/app/config/analyzer
       - ./config/log_config.yml:/app/config/log_config.yml
+      - ./data:/app/data
     environment:
       CORS_ALLOW_ALL: "no"
     depends_on:
@@ -73,6 +74,27 @@ services:
       CORS_ALLOW_ALL: "no"
     depends_on:
       - storage
+    networks:
+      - internal_network
+
+  consistency_check:
+    build:
+      context: consistency_check
+      dockerfile: Dockerfile
+    expose:
+      - "8110"
+    volumes:
+      - ./logs:/app/logs
+      - ./config/consistency_check:/app/config/consistency_check
+      - ./config/log_config.yml:/app/config/log_config.yml
+      - ./data:/app/data
+    environment:
+      CORS_ALLOW_ALL: "no"
+    depends_on:
+      - storage
+      - analyzer
+      - processing
+      - kafka
     networks:
       - internal_network
 

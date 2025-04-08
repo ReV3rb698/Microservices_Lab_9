@@ -4,9 +4,10 @@ const PROCESSING_STATS_API_URL = "/processing/statistics";
 const ANALYZER_API_URL = {
     stats: "/analyzer/stats",
     snow: "/analyzer/race_event",
-    lift: "/analyzer/telemetry_event"
+    lift: "/analyzer/telemetry_event",
+    checks: "/analyzer/checks",
+    update: "/analyzer/update"
 };
-
 
 // This function fetches and updates the general statistics
 const makeReq = (url, cb) => {
@@ -20,7 +21,7 @@ const makeReq = (url, cb) => {
         })
 }
 
-const updateCodeDiv = (result, elemId) => document.getElementById(elemId).innerText = JSON.stringify(result)
+const updateCodeDiv = (result, elemId) => document.getElementById(elemId).innerText = JSON.stringify(result, null, 2)
 
 const getLocaleDateStr = () => (new Date()).toLocaleString()
 
@@ -48,10 +49,23 @@ const getStats = () => {
             updateCodeDiv(result, "event-telemetry")
         );
     });
+    
+    // Get consistency check results
+    makeReq(ANALYZER_API_URL.checks, (result) => {
+        updateCodeDiv(result, "consistency-results");
+        
+        // Update the last check time
+        if (result.last_updated) {
+            document.getElementById("last-check-time").innerText = new Date(result.last_updated).toLocaleString();
+        }
+        
+        // Update summary stats
+        if (result.counts) {
+            document.getElementById("missing-db-count").innerText = result.missing_in_db ? result.missing_in_db.length : 0;
+            document.getElementById("missing-queue-count").innerText = result.missing_in_queue ? result.missing_in_queue.length : 0;
+        }
+    });
 };
-
-
-
 
 const updateErrorMessages = (message) => {
     const id = Date.now()
@@ -67,9 +81,39 @@ const updateErrorMessages = (message) => {
     }, 7000)
 }
 
+const runConsistencyCheck = () => {
+    document.getElementById("check-status").innerText = "Running...";
+    document.getElementById("check-button").disabled = true;
+    
+    fetch(ANALYZER_API_URL.update, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById("check-status").innerText = `Completed in ${data.processing_time_ms}ms`;
+        document.getElementById("check-button").disabled = false;
+        // Refresh stats to show new consistency check data
+        getStats();
+    })
+    .catch(error => {
+        document.getElementById("check-status").innerText = "Failed";
+        document.getElementById("check-button").disabled = false;
+        updateErrorMessages(`Error running consistency check: ${error}`);
+    });
+}
+
 const setup = () => {
     getStats()
     setInterval(() => getStats(), 4000) // Update every 4 seconds
+    
+    // Add event listener for consistency check button
+    document.getElementById("check-form").addEventListener("submit", (e) => {
+        e.preventDefault();
+        runConsistencyCheck();
+    });
 }
 
 document.addEventListener('DOMContentLoaded', setup)

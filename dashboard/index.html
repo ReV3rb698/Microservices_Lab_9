@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
     <meta name="description" content="ACIT3855 statistics application" />
-    <script src="updateStats.js?v=2"></script>
+    <script src="updateStats.js?v=3"></script>
     <title>ACIT3855 - F1 API</title>
 </head>
 
@@ -42,6 +42,27 @@
                 <h3>Telemetry event</h3>
                 <code id="event-telemetry">
                 </code>
+            </div>
+        </div>
+        
+        <h2>Consistency Checks</h2>
+        <div id="consistency-section">
+            <div id="consistency-form">
+                <h3>Run Consistency Check</h3>
+                <form id="check-form">
+                    <p>Compare events between Kafka queue and database storage</p>
+                    <button type="submit" id="check-button">Run Check</button>
+                    <span id="check-status">Ready</span>
+                </form>
+                <div id="check-summary">
+                    <p>Last check: <span id="last-check-time">Never</span></p>
+                    <p>Missing in DB: <span id="missing-db-count">0</span></p>
+                    <p>Missing in Queue: <span id="missing-queue-count">0</span></p>
+                </div>
+            </div>
+            <div id="consistency-details">
+                <h3>Check Results</h3>
+                <code id="consistency-results">No check results available</code>
             </div>
         </div>
     </main>

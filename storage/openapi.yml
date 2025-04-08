@@ -136,6 +136,61 @@ paths:
           description: Telemetry data submitted successfully.
         '200':
           description: Telemetry data submitted successfully.
+  /record_count:
+    get:
+      operationId: app.get_record_count
+      summary: Get count of records in each table
+      description: Returns the count of all rows for each event type.
+      responses:
+        '200':
+          description: Count of records in each table.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  race_events:
+                    type: integer
+                  telemetry_data:
+                    type: integer
+  /event_ids:
+    get:
+      operationId: app.get_event_ids
+      summary: Get list of race event IDs and trace IDs
+      description: Returns a list containing the event ID and trace ID for each race event.
+      responses:
+        '200':
+          description: List of race event IDs and trace IDs.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    event_id:
+                      type: integer
+                    trace_id:
+                      type: string
+  /telemetry_ids:
+    get:
+      operationId: app.get_telemetry_ids
+      summary: Get list of telemetry IDs and trace IDs
+      description: Returns a list containing the telemetry ID and trace ID for each telemetry event.
+      responses:
+        '200':
+          description: List of telemetry IDs and trace IDs.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    telemetry_id:
+                      type: integer
+                    trace_id:
+                      type: string
 components:
   schemas:
     RaceEvent:

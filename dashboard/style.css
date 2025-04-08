@@ -24,7 +24,7 @@ body {
 }
 
 /* These need to wrap and stay within container */
-#statistics, #analyzer {
+#statistics, #analyzer, #consistency-section {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -36,7 +36,7 @@ body {
 }
 
 /* Responsive inner boxes */
-#statistics > div, #analyzer > div {
+#statistics > div, #analyzer > div, #consistency-section > div {
     border: 1px solid grey;
     padding: 1em;
     flex: 1 1 300px;
@@ -48,7 +48,6 @@ body {
     flex-direction: column;     /* NEW */
 }
 
-
 /* Fix possible overflow in code blocks */
 code {
     font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
@@ -57,11 +56,57 @@ code {
     max-width: 100%;
 }
 
-#statistics > div > code, #analyzer > div > code {
+#statistics > div > code, #analyzer > div > code, #consistency-section > div > code {
     flex: 1;                    /* NEW */
     display: block;
     overflow-x: auto;
     white-space: pre-wrap;
     word-break: break-word;
     max-width: 100%;
+}
+
+/* Consistency check form styling */
+#check-form {
+    margin-bottom: 1em;
+}
+
+#check-button {
+    padding: 8px 16px;
+    background-color: #e10600;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+#check-button:hover {
+    background-color: #c10500;
+}
+
+#check-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+#check-status {
+    display: inline-block;
+    margin-left: 10px;
+    font-weight: bold;
+}
+
+#check-summary {
+    text-align: left;
+    margin-top: 1em;
+    padding: 1em;
+    background-color: #f8f8f8;
+    border-radius: 4px;
+}
+
+#consistency-details {
+    flex: 2 1 600px;
+}
+
+#last-check-time, #missing-db-count, #missing-queue-count {
+    font-weight: bold;
 }
