@@ -15,8 +15,6 @@ os.environ["LOG_FILENAME"] = "/app/logs/analyzer.log"
 
 # Load logging configuration
 with open("/app/analyzer_config.yml", "r") as f:
-    app_config = yaml.safe_load(f)
-with open("/app/analyzer_config.yml", "r") as f:
     log_config = yaml.safe_load(f)
 logging.config.dictConfig(log_config)
 logger = logging.getLogger("basicLogger")
