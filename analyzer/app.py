@@ -32,35 +32,42 @@ def get_telemetry_index(index):
     topic = client.topics[app_config['events']['topic'].encode()]
     consumer = topic.get_simple_consumer(reset_offset_on_start=True, consumer_timeout_ms=1000)
 
-    counter = 0
-    for msg in consumer:
-        msg_str = msg.value.decode("utf-8")
-        msg = json.loads(msg_str)
-        if msg["type"] == "telemetry_data" and counter == index:
-            logger.info(f"Telemetry data found at index {index}")
-            return msg["payload"], 200
-        if msg["type"] == "telemetry_data":
-            counter += 1
-    logger.warning(f"Telemetry data not found at index {index}")
-    return {"message": "Not Found"}, 404
+    try:
+        counter = 0
+        for msg in consumer:
+            msg_str = msg.value.decode("utf-8")
+            msg = json.loads(msg_str)
+            if msg["type"] == "telemetry_data" and counter == index:
+                logger.info(f"Telemetry data found at index {index}")
+                return msg["payload"], 200
+            if msg["type"] == "telemetry_data":
+                counter += 1
+        logger.warning(f"Telemetry data not found at index {index}")
+        return {"message": "Not Found"}, 404
+    finally:
+        consumer.stop()  # Explicitly stop the consumer to ensure cleanup
 
 def get_race_event_index(index):
     logger.info(f"Fetching race event at index {index}")
     client = KafkaClient(hosts=f"{app_config['events']['hostname']}:{app_config['events']['port']}")
     topic = client.topics[app_config['events']['topic'].encode()]
     consumer = topic.get_simple_consumer(reset_offset_on_start=True, consumer_timeout_ms=1000)
-    counter = 0
-    for msg in consumer:
-        msg_str = msg.value.decode("utf-8")
-        msg = json.loads(msg_str)
-        logger.debug(f"Consumed message: {msg}")
-        if msg["type"] == "race_events" and counter == index:
-            logger.info(f"Race event found at index {index}")
-            return msg["payload"], 200
-        if msg["type"] == "race_events":
-            counter += 1
-    logger.warning(f"Race event not found at index {index}")
-    return {"message": "Not Found"}, 404
+
+    try:
+        counter = 0
+        for msg in consumer:
+            msg_str = msg.value.decode("utf-8")
+            msg = json.loads(msg_str)
+            logger.debug(f"Consumed message: {msg}")
+            if msg["type"] == "race_events" and counter == index:
+                logger.info(f"Race event found at index {index}")
+                return msg["payload"], 200
+            if msg["type"] == "race_events":
+                counter += 1
+        logger.warning(f"Race event not found at index {index}")
+        return {"message": "Not Found"}, 404
+    finally:
+        consumer.stop()  # Explicitly stop the consumer to ensure cleanup
 
 def get_stats():
     logger.info("Fetching statistics")
