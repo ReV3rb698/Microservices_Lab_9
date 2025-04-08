@@ -230,6 +230,10 @@ def get_consistency_check():
         with open(CONSISTENCY_FILE, "r") as f:
             consistency_check = json.load(f)
         
+        # Ensure last_updated is a valid string or set a default value
+        if consistency_check["last_updated"] is None:
+            consistency_check["last_updated"] = "1970-01-01T00:00:00Z"
+        
         logger.info("GET request for consistency check results completed")
         return consistency_check, 200
     except Exception as e:
