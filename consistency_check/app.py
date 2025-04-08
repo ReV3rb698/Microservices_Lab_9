@@ -38,8 +38,7 @@ def get_consistency_checks():
         
         if not os.path.exists(CONSISTENCY_FILE):
             logger.warning("No consistency check file found")
-            # Return an empty but valid schema
-            return 404
+            return {"message": "Consistency check file not found"}, 404
 
         
         with open(CONSISTENCY_FILE, "r") as f:
