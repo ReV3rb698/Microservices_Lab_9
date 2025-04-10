@@ -60,7 +60,8 @@ def log_event(event_type, event_data):
         "datetime": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
         "payload": event_entry
     }
-    kafka_producer.producer.produce(json.dumps(msg))
+    msg_str= json.dumps(msg)
+    kafka_producer.producer.produce(msg_str.encode('utf-8'))
     logger.info("Produced event %s with a trace id of %s", event_type, trace_id)
     return 201
 
