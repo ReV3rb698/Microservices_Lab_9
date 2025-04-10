@@ -36,16 +36,23 @@ kafka_producer = KafkaProducerWrapper(
 
 def process_messages():
 
-    for msg in kafka_producer.messages:
+    for msg in kafka_producer.consumer:
         msg_str = msg.value.decode('utf-8')
         msg = json.loads(msg_str)
         logger.info("Message: %s", msg)
 
         payload = msg['payload']
-        if msg["type"] == "telemetry_data":
-            submit_telemetry_data(payload)
-        elif msg["type"] == "race_events":
-            submit_race_events(payload)
+        try:
+            if msg["type"] == "telemetry_data":
+                submit_telemetry_data(payload)
+            elif msg["type"] == "race_events":
+                submit_race_events(payload)
+            logger.info("Successfully processed %s with trace_id %s", msg["type"], payload.get("trace_id"))
+        except Exception as e:
+            logger.error("Failed to process %s: %s", msg["type"], str(e))
+            continue  # don't crash the loop
+        kafka_producer.consumer.commit_offsets()
+
 
 def setup_kafka_thread():
     t1 = Thread(target=process_messages)
