@@ -16,6 +16,7 @@ from threading import Thread
 import os
 from connexion.middleware import MiddlewarePosition
 from starlette.middleware.cors import CORSMiddleware
+from kafka_wrapper import KafkaProducerWrapper
 
 os.environ["LOG_FILENAME"] = "/app/logs/storage.log"
 
@@ -28,14 +29,14 @@ logger = logging.getLogger("basicLogger")
 with open('/app/config/storage/storage_config.yml', 'r') as f:
     config = yaml.safe_load(f)
 
+kafka_producer = KafkaProducerWrapper(
+    hostname=f"{config['events']['hostname']}:{config['events']['port']}",
+    topic=config['events']['topic']
+)
 
 def process_messages():
-    hostname = config['events']['hostname'] + ':' + str(config['events']['port'])
-    client = KafkaClient(hosts=hostname)
-    topic = client.topics[str.encode(config['events']['topic'])]
 
-    consumer = topic.get_simple_consumer(consumer_group=b'event_group', reset_offset_on_start=False, auto_offset_reset=OffsetType.LATEST)
-    for msg in consumer:
+    for msg in kafka_producer.messages:
         msg_str = msg.value.decode('utf-8')
         msg = json.loads(msg_str)
         logger.info("Message: %s", msg)
@@ -45,7 +46,6 @@ def process_messages():
             submit_telemetry_data(payload)
         elif msg["type"] == "race_events":
             submit_race_events(payload)
-        consumer.commit_offsets()
 
 def setup_kafka_thread():
     t1 = Thread(target=process_messages)

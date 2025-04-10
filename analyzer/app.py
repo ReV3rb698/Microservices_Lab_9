@@ -11,6 +11,7 @@ from datetime import datetime
 import httpx
 from connexion.middleware import MiddlewarePosition
 from starlette.middleware.cors import CORSMiddleware
+
 os.environ["LOG_FILENAME"] = "/app/logs/analyzer.log"
 
 # Load logging configuration
@@ -26,11 +27,12 @@ logger.debug(f"Loaded config: {json.dumps(app_config, indent=2)}")
 
 # Define consistency check file path
 CONSISTENCY_FILE = "./consistency_check.json"  # Changed to a relative path
+client = KafkaClient(hosts=f"{app_config['events']['hostname']}:{app_config['events']['port']}")
+topic = client.topics[app_config['events']['topic'].encode()]
 
 def get_telemetry_index(index):
     logger.info(f"Fetching telemetry data at index {index}")
-    client = KafkaClient(hosts=f"{app_config['events']['hostname']}:{app_config['events']['port']}")
-    topic = client.topics[app_config['events']['topic'].encode()]
+    
     consumer = topic.get_simple_consumer(reset_offset_on_start=True, consumer_timeout_ms=1000)
 
     try:
@@ -50,8 +52,6 @@ def get_telemetry_index(index):
 
 def get_race_event_index(index):
     logger.info(f"Fetching race event at index {index}")
-    client = KafkaClient(hosts=f"{app_config['events']['hostname']}:{app_config['events']['port']}")
-    topic = client.topics[app_config['events']['topic'].encode()]
     consumer = topic.get_simple_consumer(reset_offset_on_start=True, consumer_timeout_ms=1000)
 
     try:
