@@ -73,6 +73,7 @@ def use_db_session(func):
 @use_db_session
 def submit_race_events(session, body):
     event = RaceEvents(
+        event_id=body['event_id'],
         car_number=body['car_number'],
         lap_number=body['lap_number'],
         event_type=body['event_type'],
@@ -81,13 +82,14 @@ def submit_race_events(session, body):
     )
     session.add(event)
     session.commit()
-    
+    session.close()
     logger.debug("Stored event %s with a trace id of %s", event.event_type, event.trace_id)
     return NoContent, 201
 
 @use_db_session
 def submit_telemetry_data(session, body):
     telemetry = TelemetryData(
+        telemetry_id=body['telemetry_id'],
         car_number=body['car_number'],
         lap_number=body['lap_number'],
         speed=body['speed'],
@@ -98,7 +100,7 @@ def submit_telemetry_data(session, body):
     )
     session.add(telemetry)
     session.commit()
-   
+    session.close()
     logger.debug("Stored event telemetry_data with a trace id of %s", telemetry.trace_id)
     return NoContent, 201
    
