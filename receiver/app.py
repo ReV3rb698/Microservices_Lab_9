@@ -11,6 +11,7 @@ import json
 import os
 from connexion.middleware import MiddlewarePosition
 from starlette.middleware.cors import CORSMiddleware
+from kafka_wrapper import KafkaProducerWrapper
 
 os.environ["LOG_FILENAME"] = "/app/logs/receiver.log"
 with open('/app/config/log_config.yml', 'r') as f:
@@ -21,33 +22,34 @@ logger = logging.getLogger("basicLogger")
 with open('/app/config/receiver/receiver_config.yml', 'r') as f:
     config = yaml.safe_load(f)
 
-
+kafka_producer = KafkaProducerWrapper(
+    hostname=f"{config['events']['hostname']}:{config['events']['port']}",
+    topic=config['events']['topic']
+)
 
 def log_event(event_type, event_data):
-    client = KafkaClient(hosts=config['events']['hostname'] + ':' + str(config['events']['port']))
-    topic = client.topics[str.encode(config['events']['topic'])]
-    producer = topic.get_sync_producer()
-    timestamp = int(time.time())  # Use UNIX timestamp
-    trace_id = str(time.time_ns())  # Ensure it's a string
+    timestamp = int(time.time())
+    trace_id = str(time.time_ns())
+
     if event_type == "race_events":
         event_entry = {
-            "event_id": str(uuid.uuid4()),
+            "event_id": event_data['event_id'],
             "car_number": event_data['car_number'],
             "lap_number": event_data['lap_number'],
             "event_type": event_data.get('event_type', None),
             "timestamp": timestamp,
-            "trace_id": trace_id  
+            "trace_id": trace_id
         }
     elif event_type == "telemetry_data":
         event_entry = {
-            "telemetry_id": str(uuid.uuid4()),
+            "telemetry_id": event_data['telemetry_id'],
             "car_number": event_data['car_number'],
             "lap_number": event_data['lap_number'],
             "speed": event_data.get('speed', None),
             "fuel_level": event_data.get('fuel_level', None),
             "rpm": event_data.get('rpm', None),
             "timestamp": timestamp,
-            "trace_id": trace_id  
+            "trace_id": trace_id
         }
     else:
         logger.error("Unknown event type: %s", event_type)
@@ -58,11 +60,10 @@ def log_event(event_type, event_data):
         "datetime": datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
         "payload": event_entry
     }
-    msg_str = json.dumps(msg)
-    producer.produce(msg_str.encode('utf-8'))
-
+    kafka_producer.produce(json.dumps(msg))
     logger.info("Produced event %s with a trace id of %s", event_type, trace_id)
     return 201
+
 
 def submit_race_events(body):
     status_code = log_event("race_events", body)
