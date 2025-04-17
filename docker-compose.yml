@@ -182,7 +182,6 @@ services:
       - "8300"
     depends_on:
       - kafka
-      - dashboard
       - receiver
       - storage
       - db

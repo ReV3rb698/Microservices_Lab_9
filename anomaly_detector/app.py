@@ -91,7 +91,7 @@ def get_anomalies(event_type=None):
         with open(ANOMALY_FILE, "r") as f:
                 payload_to_return = json.load(f)
     except Exception:
-        return 404
+        return {"msg": "Error with opening the json"},404
         
     if event_type not in valid_types:
         return 400
