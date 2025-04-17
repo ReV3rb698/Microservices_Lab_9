@@ -173,7 +173,24 @@ services:
       - CONSISTENCY_CHECK_URL=http://consistency_check:8110
     networks:
       - internal_network
-
+  anomaly_detector:
+    build:
+      context: anomaly_detector
+      dockerfile: Dockerfile
+    ports:
+      - "8300"
+    depends_on:
+      - kafka
+    environment:
+      - MAX_LAP_COUNT=78
+      - MIN_SPEED=0
+    networks:
+      - internal_network
+    volumes:
+      - ./logs:/app/logs
+      - ./config/anomaly_detector:/app/config/anomaly_detector
+      - ./config/log_config.yml:/app/config/log_config.yml
+      - ./data:/app/data
 volumes:
   db-data:
   zookeeper-data:
