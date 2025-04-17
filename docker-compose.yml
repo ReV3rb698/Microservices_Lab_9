@@ -181,6 +181,10 @@ services:
       - "8300"
     depends_on:
       - kafka
+      - dashboard
+      - receiver
+      - storage
+      - db
     environment:
       - MAX_LAP_COUNT=78
       - MIN_SPEED=0
