@@ -165,6 +165,7 @@ services:
       - processing
       - storage
       - consistency_check
+      - anomaly_detector
     environment:
       - RECEIVER_URL=http://receiver:8080
       - STORAGE_URL=http://storage:8090
