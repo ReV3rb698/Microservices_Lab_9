@@ -97,7 +97,7 @@ def get_anomalies(event_type=None):
         return 400
     if len(payload_to_return) == 0:
         logger.debug(f"Anomalies retreived: {len(payload_to_return)} ")
-        return 204
+        return {"msg": "No anomalies found"},204
     if event_type == "race_event":
         for i in payload_to_return:
             if i["event_type"] == "telemetry_event":
