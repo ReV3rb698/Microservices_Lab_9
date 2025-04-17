@@ -184,13 +184,14 @@ services:
     environment:
       - MAX_LAP_COUNT=78
       - MIN_SPEED=0
-    networks:
-      - internal_network
+    
     volumes:
       - ./logs:/app/logs
       - ./config/anomaly_detector:/app/config/anomaly_detector
       - ./config/log_config.yml:/app/config/log_config.yml
       - ./data:/app/data
+    networks:
+      - internal_network
 volumes:
   db-data:
   zookeeper-data:
