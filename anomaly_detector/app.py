@@ -15,8 +15,8 @@ from pykafka import KafkaClient
 
 # Set environment variable for logging
 os.environ["LOG_FILENAME"] = "/app/logs/anomaly_detector.log"
-MAX_LAP_COUNT = os.getenv("MAX_LAP_COUNT")
-MIN_SPEED = os.getenv("MIN_SPEED")
+MAX_LAP_COUNT = int(os.getenv("MAX_LAP_COUNT", 78)) 
+MIN_SPEED = int(os.getenv("MIN_SPEED", 0)) 
 # Load logging configuration
 with open('/app/config/log_config.yml', 'r') as f:
     log_config = yaml.safe_load(f)
