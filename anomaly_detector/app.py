@@ -24,7 +24,7 @@ logging.config.dictConfig(log_config)
 logger = logging.getLogger("basicLogger")
 
 # Load application configuration
-with open('/app/config/anamaly_detector/anomaly_config.yml', 'r') as f:
+with open('/app/config/anomaly_detector/anomaly_config.yml', 'r') as f:
     app_config = yaml.safe_load(f)
 
 # Define consistency check file path
