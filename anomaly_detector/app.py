@@ -44,16 +44,16 @@ def update_anomalies():
             "anomaly_type": "None",
             "description": "None" 
     }
+    consumer = None 
     try:
         consumer = topic.get_simple_consumer(reset_offset_on_start=True, consumer_timeout_ms=1000)
         anomaly_payload = {"anomalies_count": 0}
-        telemetry_counter = 0
         counter = 0
         for msg in consumer:
             msg_str = msg.value.decode("utf-8")
             msg = json.loads(msg_str)
             if msg["type"] == "telemetry_data" and msg["payload"]["min_speed"] < MIN_SPEED:
-                logger.debug(f"anomaly detected, {msg["payload"]["min_speed"]} is below {MIN_SPEED}")
+                logger.debug(f"anomaly detected, {msg['payload']['min_speed']} is below {MIN_SPEED}")
                 anomaly_to_save = anomaly_payload
                 anomaly_to_save["event_id"] = msg["payload"]["event_id"]
                 anomaly_to_save["trace_id"] = msg["payload"]["trace_id"]
@@ -64,7 +64,7 @@ def update_anomalies():
                 counter += 1
                 
             if msg["type"] == "race_event" and msg["payload"]["lap_number"] > MAX_LAP_COUNT:
-                logger.debug(f"anomaly detected, {msg["payload"]["lap_number"]} is above {MAX_LAP_COUNT}")
+                logger.debug(f"anomaly detected, {msg['payload']['lap_number']} is above {MAX_LAP_COUNT}")
                 anomaly_to_save = anomaly_payload
                 anomaly_to_save["event_id"] = msg["payload"]["event_id"]
                 anomaly_to_save["trace_id"] = msg["payload"]["trace_id"]
@@ -80,9 +80,13 @@ def update_anomalies():
         with open(ANOMALY_FILE, "w") as f:
             json.dump(anomalies_to_save, f, indent=2)
         return anomaly_payload, 200
-                           
+    except Exception as e:
+        logger.error(f"Error in update_anomalies: {e}")
+        return {"msg": "Error occurred while updating anomalies"}, 500
     finally:
-        consumer.stop()
+        if consumer:
+            consumer.stop()
+
 
 def get_anomalies(event_type=None):
     logger.debug("Getting anomalies..")
