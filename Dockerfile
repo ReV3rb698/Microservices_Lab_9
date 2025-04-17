@@ -2,6 +2,7 @@ FROM python:3
 
 RUN mkdir /app
 COPY ../config/log_config.yml /app/config/log_config.yml
+COPY ../config/anomaly_detector/anomaly_config.yml /app/config/anomaly_detector/anomaly_config.yml
 COPY ./requirements.txt /app/requirements.txt
 WORKDIR /app
 RUN pip install -r requirements.txt
