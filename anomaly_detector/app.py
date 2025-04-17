@@ -93,7 +93,7 @@ def get_anomalies(event_type=None):
     except Exception:
         return {"msg": "Error with opening the json"},404
         
-    if event_type not in valid_types:
+    if event_type not in valid_types and event_type != None:
         return {"msg":"Need to put a variable!"},400
     if len(payload_to_return) == 0:
         logger.debug(f"Anomalies retreived: {len(payload_to_return)} ")
